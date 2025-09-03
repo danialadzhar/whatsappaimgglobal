@@ -23,12 +23,12 @@ const navigationItems = ref([
         icon: '❓',
         active: false
     },
-    //   {
-    //     name: 'Invoice',
-    //     href: '#',
-    //     icon: '📄',
-    //     active: false
-    //   },
+    {
+        name: 'Customers',
+        href: 'customers',
+        icon: '👥',
+        active: false
+    },
     //   {
     //     name: 'Cards',
     //     href: '#',
@@ -91,7 +91,8 @@ const supportItems = ref([
                         <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">General</p>
                         <nav class="mt-2 space-y-1">
                             <Link v-for="item in navigationItems" :key="item.name"
-                                :href="item.href === 'dashboard' ? route(item.href) : item.href" :class="[
+                                :href="item.href === 'dashboard' || item.href === 'customers' ? route(item.href) : item.href"
+                                :class="[
                                     item.active
                                         ? 'bg-blue-50 border-r-2 border-blue-600 text-blue-700'
                                         : 'text-gray-700 hover:bg-gray-50',
@@ -192,7 +193,8 @@ const supportItems = ref([
                     </div>
                     <nav class="mt-5 px-2 space-y-1">
                         <ResponsiveNavLink v-for="item in navigationItems" :key="item.name"
-                            :href="item.href === 'dashboard' ? route(item.href) : item.href" :active="item.active">
+                            :href="item.href === 'dashboard' || item.href === 'customers' ? route(item.href) : item.href"
+                            :active="item.active">
                             <span class="text-lg mr-3">{{ item.icon }}</span>
                             {{ item.name }}
                         </ResponsiveNavLink>
@@ -203,7 +205,7 @@ const supportItems = ref([
                         <div class="flex items-center">
                             <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
                                 <span class="text-sm font-medium text-gray-700">{{ $page.props.auth.user.name.charAt(0)
-                                    }}</span>
+                                }}</span>
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm font-medium text-gray-700">{{ $page.props.auth.user.name }}</p>

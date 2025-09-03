@@ -20,6 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // FAQ API Routes (without CSRF protection)
-Route::get('/faq', [FAQController::class, 'getFAQData']);
 Route::get('/faq/db', [FAQController::class, 'getFAQDataFromDB']);
 Route::post('/faq', [FAQController::class, 'store'])->withoutMiddleware(['web']);

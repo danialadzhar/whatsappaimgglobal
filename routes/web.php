@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FAQController;
+use App\Http\Controllers\CustomerController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,9 +27,17 @@ Route::middleware('auth')->group(function () {
 
     // FAQ Routes
     Route::get('/faq', [FAQController::class, 'index'])->name('faq');
-    Route::get('/api/faq', [FAQController::class, 'getFAQData'])->name('api.faq');
-    Route::get('/api/faq/db', [FAQController::class, 'getFAQDataFromDB'])->name('api.faq.db');
-    Route::post('/api/faq', [FAQController::class, 'store'])->name('api.faq.store');
+
+    // Customer Routes
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers');
+    Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
 });
+
+// API Routes
+Route::get('/api/faq/db', [FAQController::class, 'getFAQDataFromDB'])->name('api.faq.db');
+Route::post('/api/faq', [FAQController::class, 'store'])->name('api.faq.store');
+
+// Customer API Routes
+Route::post('/api/customers', [CustomerController::class, 'store'])->name('api.customers.store');
 
 require __DIR__ . '/auth.php';
