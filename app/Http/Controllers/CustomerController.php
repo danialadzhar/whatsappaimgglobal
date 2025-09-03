@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\MessageLog;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -90,7 +91,7 @@ class CustomerController extends Controller
             // Return error response
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengambil data customer: ' . $e->getMessage(),
+                'message' => 'Gagal mengambil data customer',
                 'data' => null
             ], 500);
         }
@@ -139,7 +140,7 @@ class CustomerController extends Controller
             // Return validation error response
             return response()->json([
                 'success' => false,
-                'message' => 'Validation error: ' . $e->getMessage(),
+                'message' => 'Validation error',
                 'errors' => $e->errors(),
                 'data' => null
             ], 422);
@@ -147,7 +148,58 @@ class CustomerController extends Controller
             // Return error response
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mencari customer: ' . $e->getMessage(),
+                'message' => 'Gagal mencari customer',
+                'data' => null
+            ], 500);
+        }
+    }
+
+    /**
+     * Store message log for customer conversation.
+     * Simpan log mesej untuk perbualan customer
+     */
+    public function storeMessageLog(Request $request)
+    {
+        try {
+            // Validate input data
+            $request->validate([
+                'customer_messages' => 'required|string',
+                'ai_messages' => 'required|string',
+                'customer_id' => 'required|integer|exists:customers,id',
+            ]);
+
+            // Create new message log
+            $messageLog = MessageLog::create([
+                'customer_messages' => $request->customer_messages,
+                'ai_messages' => $request->ai_messages,
+                'customer_id' => $request->customer_id,
+            ]);
+
+            // Load customer relationship
+            $messageLog->load('customer');
+
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Message log berjaya disimpan!',
+                'data' => [
+                    'message_log' => $messageLog,
+                    'customer' => $messageLog->customer
+                ]
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Return validation error response
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors(),
+                'data' => null
+            ], 422);
+        } catch (\Exception $e) {
+            // Return error response
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan message log',
                 'data' => null
             ], 500);
         }

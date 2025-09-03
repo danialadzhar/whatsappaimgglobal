@@ -28,3 +28,6 @@ Route::post('/faq', [FAQController::class, 'store'])->name('api.faq.store')->wit
 Route::post('/customers', [CustomerController::class, 'store'])->name('api.customers.store');
 Route::get('/customers/db', [CustomerController::class, 'getCustomerDataFromDB'])->name('api.customers.db');
 Route::get('/customers/phone', [CustomerController::class, 'getCustomerByPhone'])->name('api.customers.phone');
+
+// Message Logs API Routes (without CSRF protection for n8n integration)
+Route::post('/message-logs', [CustomerController::class, 'storeMessageLog'])->name('api.message-logs.store');

@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import PocketCard from '@/Components/Dashboard/PocketCard.vue';
 import StatCard from '@/Components/Dashboard/StatCard.vue';
 import TransactionTable from '@/Components/Dashboard/TransactionTable.vue';
@@ -9,13 +9,14 @@ import { ref } from 'vue';
 // Data untuk WhatsApp AI Chatbot statistics
 const chatbotStats = ref([
     {
-        title: 'Total Users',
-        description: 'Users yang telah message',
+        title: 'Total Customer',
+        description: 'Customer ',
         count: 1247,
-        subtitle: 'Active users this month',
+        subtitle: 'Active customers this month',
         icon: '👥',
         iconBgClass: 'bg-blue-100',
-        actionText: 'View All Users'
+        actionText: 'View All Customer',
+        actionRoute: 'customers'
     },
     {
         title: 'Customer Messages',
