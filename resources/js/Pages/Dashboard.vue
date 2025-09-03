@@ -118,8 +118,8 @@ const handleActionClick = (actionRoute) => {
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     <PocketCard v-for="stat in chatbotStats" :key="stat.title" :title="stat.title"
                         :description="stat.description" :count="stat.count" :subtitle="stat.subtitle" :icon="stat.icon"
-                        :icon-bg-class="stat.iconBgClass" :action-text="stat.actionText" :action-route="stat.actionRoute"
-                        @action-click="handleActionClick" />
+                        :icon-bg-class="stat.iconBgClass" :action-text="stat.actionText"
+                        :action-route="stat.actionRoute" @action-click="handleActionClick" />
                 </div>
 
                 <!-- Analytics Cards Grid -->
