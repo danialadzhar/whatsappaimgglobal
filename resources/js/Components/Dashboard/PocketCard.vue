@@ -77,8 +77,13 @@ const handleActionClick = () => {
     }
 }
 
-// Format count dengan koma
+// Format count dengan koma atau percentage
 const formattedCount = computed(() => {
+    // Jika count adalah percentage (untuk Response Rate), tambah % symbol
+    if (props.title === 'Response Rate') {
+        return props.count + '%'
+    }
+    // Untuk count biasa, guna format dengan koma
     return props.count.toLocaleString('en-US')
 })
 </script>

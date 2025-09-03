@@ -18,7 +18,7 @@ const props = defineProps({
 const chatbotStats = computed(() => [
     {
         title: 'Total Customer',
-        description: 'Customer yang telah message',
+        description: 'Customer engaged',
         count: props.stats.totalCustomers || 0,
         subtitle: 'Active customers this month',
         icon: '👥',
@@ -28,21 +28,21 @@ const chatbotStats = computed(() => [
     },
     {
         title: 'Customer Messages',
-        description: 'Last chat dari customer',
+        description: 'Total messages from customers',
         count: props.stats.totalMessages || 0,
-        subtitle: 'Pending AI responses',
+        subtitle: 'Total messages',
         icon: '💬',
         iconBgClass: 'bg-green-100',
         actionText: 'View Messages'
     },
     {
-        title: 'Unreplied Chats',
-        description: 'Chat yang tak reply AI',
-        count: props.stats.unrepliedMessages || 0,
-        subtitle: 'Requires attention',
-        icon: '⚠️',
-        iconBgClass: 'bg-orange-100',
-        actionText: 'Handle Chats'
+        title: 'Response Rate',
+        description: 'AI response dalam masa 1 minit',
+        count: props.stats.responseRate || 0,
+        subtitle: 'Percentage of fast responses',
+        icon: '⚡',
+        iconBgClass: 'bg-green-100',
+        actionText: 'View Analytics'
     }
 ]);
 
