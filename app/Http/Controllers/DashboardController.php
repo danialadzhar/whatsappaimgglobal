@@ -17,12 +17,12 @@ class DashboardController extends Controller
     {
         // Get total customers count from database
         $totalCustomers = Customer::count();
-        
+
         // Get total message logs count
         $totalMessages = MessageLog::count();
-        
-        // Get unreplied messages count (assuming there's a status field)
-        $unrepliedMessages = MessageLog::where('status', 'pending')->count();
+
+        // Get unreplied messages count (messages without AI response)
+        $unrepliedMessages = MessageLog::whereNull('ai_messages')->orWhere('ai_messages', '')->count();
 
         // Prepare dashboard statistics
         $dashboardStats = [
