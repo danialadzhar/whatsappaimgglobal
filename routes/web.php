@@ -33,11 +33,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
 });
 
-// API Routes
-Route::get('/api/faq/db', [FAQController::class, 'getFAQDataFromDB'])->name('api.faq.db');
-Route::post('/api/faq', [FAQController::class, 'store'])->name('api.faq.store');
-
-// Customer API Routes
-Route::post('/api/customers', [CustomerController::class, 'store'])->name('api.customers.store');
+// API Routes moved to routes/api.php for consistency
 
 require __DIR__ . '/auth.php';
