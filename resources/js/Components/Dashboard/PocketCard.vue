@@ -19,7 +19,7 @@
 
         <!-- Action Button -->
         <button
-            @click="handleAction"
+            @click="handleActionClick"
             class="flex items-center justify-between w-full p-3 hover:bg-gray-50 rounded-lg transition-colors group">
             <span class="text-sm text-gray-700">{{ actionText }}</span>
             <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none"
@@ -32,8 +32,6 @@
 
 <script setup>
 import { computed } from 'vue'
-import { router } from '@inertiajs/vue3'
-import { route } from 'ziggy-js'
 
 const props = defineProps({
     title: {
@@ -70,15 +68,18 @@ const props = defineProps({
     }
 })
 
+// Define emits untuk action-click event
+const emit = defineEmits(['action-click'])
+
+// Fungsi untuk handle action click
+const handleActionClick = () => {
+    if (props.actionRoute) {
+        emit('action-click', props.actionRoute)
+    }
+}
+
 // Format count dengan koma
 const formattedCount = computed(() => {
     return props.count.toLocaleString('en-US')
 })
-
-// Handle action button click
-const handleAction = () => {
-    if (props.actionRoute) {
-        router.visit(route(props.actionRoute))
-    }
-}
 </script>

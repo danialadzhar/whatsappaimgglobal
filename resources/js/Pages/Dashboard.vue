@@ -10,7 +10,7 @@ import { ref } from 'vue';
 const chatbotStats = ref([
     {
         title: 'Total Customer',
-        description: 'Customer ',
+        description: 'Customer yang telah message',
         count: 1247,
         subtitle: 'Active customers this month',
         icon: '👥',
@@ -83,6 +83,13 @@ const recentConversations = ref([
         status: 'Replied'
     }
 ]);
+
+// Fungsi untuk handle action click
+const handleActionClick = (actionRoute) => {
+    if (actionRoute) {
+        router.visit(route(actionRoute));
+    }
+};
 </script>
 
 <template>
@@ -111,7 +118,8 @@ const recentConversations = ref([
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     <PocketCard v-for="stat in chatbotStats" :key="stat.title" :title="stat.title"
                         :description="stat.description" :count="stat.count" :subtitle="stat.subtitle" :icon="stat.icon"
-                        :icon-bg-class="stat.iconBgClass" :action-text="stat.actionText" />
+                        :icon-bg-class="stat.iconBgClass" :action-text="stat.actionText" :action-route="stat.actionRoute"
+                        @action-click="handleActionClick" />
                 </div>
 
                 <!-- Analytics Cards Grid -->
