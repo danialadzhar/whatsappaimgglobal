@@ -4,14 +4,22 @@ import { Head, router } from '@inertiajs/vue3';
 import PocketCard from '@/Components/Dashboard/PocketCard.vue';
 import StatCard from '@/Components/Dashboard/StatCard.vue';
 import TransactionTable from '@/Components/Dashboard/TransactionTable.vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
-// Data untuk WhatsApp AI Chatbot statistics
-const chatbotStats = ref([
+// Props untuk menerima data dari controller
+const props = defineProps({
+    stats: {
+        type: Object,
+        required: true
+    }
+});
+
+// Data untuk WhatsApp AI Chatbot statistics menggunakan real data dari database
+const chatbotStats = computed(() => [
     {
         title: 'Total Customer',
         description: 'Customer yang telah message',
-        count: 1247,
+        count: props.stats.totalCustomers || 0,
         subtitle: 'Active customers this month',
         icon: '👥',
         iconBgClass: 'bg-blue-100',
@@ -21,7 +29,7 @@ const chatbotStats = ref([
     {
         title: 'Customer Messages',
         description: 'Last chat dari customer',
-        count: 892,
+        count: props.stats.totalMessages || 0,
         subtitle: 'Pending AI responses',
         icon: '💬',
         iconBgClass: 'bg-green-100',
@@ -30,7 +38,7 @@ const chatbotStats = ref([
     {
         title: 'Unreplied Chats',
         description: 'Chat yang tak reply AI',
-        count: 156,
+        count: props.stats.unrepliedMessages || 0,
         subtitle: 'Requires attention',
         icon: '⚠️',
         iconBgClass: 'bg-orange-100',
