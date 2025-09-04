@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
 
 // Props untuk menerima data FAQ
@@ -16,6 +16,16 @@ const emit = defineEmits(['delete-faq', 'refresh-data']);
 
 // State untuk accordion
 const openItems = ref(new Set());
+
+// Function untuk format branch name
+const formatBranchName = (branchCode) => {
+    const branchMap = {
+        'BERTAM': 'Bertam',
+        'PADANG_SERAI': 'Padang Serai',
+        'IPOH': 'Ipoh'
+    };
+    return branchMap[branchCode] || branchCode;
+};
 
 // State untuk delete confirmation - tidak diperlukan lagi dengan SweetAlert
 // const showDeleteModal = ref(false);
@@ -40,7 +50,7 @@ const confirmDelete = (faq) => {
                 <p class="text-gray-600 mb-3">Are you sure you want to delete this FAQ? This action cannot be undone.</p>
                 <div class="bg-gray-50 p-3 rounded-md">
                     <p class="font-medium text-gray-900">${faq.question}</p>
-                    <p class="text-sm text-gray-500 mt-1">Category: ${faq.category}</p>
+                    <p class="text-sm text-gray-500 mt-1">Branch: ${formatBranchName(faq.branch)}</p>
                 </div>
             </div>
         `,
@@ -71,7 +81,7 @@ const deleteFAQ = async (faq) => {
             // Show success message dengan SweetAlert
             Swal.fire({
                 title: 'Success!',
-                text: 'FAQ berjaya dihapus!',
+                text: 'FAQ successfully deleted',
                 icon: 'success',
                 confirmButtonColor: '#10b981',
                 timer: 2000,
@@ -112,7 +122,7 @@ const deleteFAQ = async (faq) => {
                             <div class="mt-1 flex items-center space-x-2">
                                 <span
                                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ faq.category }}
+                                    {{ formatBranchName(faq.branch) }}
                                 </span>
                                 <span class="text-sm text-gray-500">
                                     {{ new Date(faq.created_at).toLocaleDateString('ms-MY') }}

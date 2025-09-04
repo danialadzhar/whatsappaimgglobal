@@ -7,11 +7,11 @@ const props = defineProps({
         type: String,
         required: true
     },
-    selectedCategory: {
+    selectedBranch: {
         type: String,
         required: true
     },
-    categories: {
+    branches: {
         type: Array,
         required: true,
         default: () => []
@@ -19,7 +19,7 @@ const props = defineProps({
 });
 
 // Emits untuk update parent component
-const emit = defineEmits(['update:searchQuery', 'update:selectedCategory', 'add-faq']);
+const emit = defineEmits(['update:searchQuery', 'update:selectedBranch', 'add-faq']);
 
 // Local search query untuk debounce
 const localSearchQuery = ref(props.searchQuery);
@@ -60,9 +60,9 @@ const updateSearchQuery = (value) => {
     localSearchQuery.value = value;
 };
 
-// Update selected category
-const updateSelectedCategory = (value) => {
-    emit('update:selectedCategory', value);
+// Update selected branch
+const updateSelectedBranch = (value) => {
+    emit('update:selectedBranch', value);
 };
 
 // Handle add FAQ button click
@@ -127,17 +127,17 @@ const clearSearch = () => {
                     </div>
                 </div>
 
-                <!-- Category Filter -->
+                <!-- Branch Filter -->
                 <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
-                        Category
+                    <label for="branch" class="block text-sm font-medium text-gray-700 mb-2">
+                        Branch
                     </label>
-                    <select id="category" :value="selectedCategory"
-                        @change="updateSelectedCategory($event.target.value)"
+                    <select id="branch" :value="selectedBranch" @change="updateSelectedBranch($event.target.value)"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option v-for="category in categories" :key="category" :value="category">
-                            {{ category }}
-                        </option>
+                        <option value="All">All Branches</option>
+                        <option value="BERTAM">Bertam</option>
+                        <option value="PADANG_SERAI">Padang Serai</option>
+                        <option value="IPOH">Ipoh</option>
                     </select>
                 </div>
             </div>

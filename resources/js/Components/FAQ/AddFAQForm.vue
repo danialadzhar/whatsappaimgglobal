@@ -8,7 +8,7 @@ import InputError from '@/Components/InputError.vue';
 
 // Props untuk form
 const props = defineProps({
-    categories: {
+    branches: {
         type: Array,
         required: true,
         default: () => []
@@ -30,7 +30,7 @@ const emit = defineEmits(['close', 'submit']);
 const form = ref({
     question: '',
     answer: '',
-    category: ''
+    branch: ''
 });
 
 // Form validation
@@ -40,7 +40,7 @@ const errors = ref({});
 const isFormValid = computed(() => {
     return form.value.question.trim() !== '' &&
         form.value.answer.trim() !== '' &&
-        form.value.category !== '';
+        form.value.branch !== '';
 });
 
 // Reset form
@@ -48,7 +48,7 @@ const resetForm = () => {
     form.value = {
         question: '',
         answer: '',
-        category: ''
+        branch: ''
     };
     errors.value = {};
 };
@@ -65,7 +65,7 @@ const submitForm = async () => {
         errors.value = {
             question: form.value.question.trim() === '' ? 'Question is required' : '',
             answer: form.value.answer.trim() === '' ? 'Answer is required' : '',
-            category: form.value.category === '' ? 'Category is required' : ''
+            branch: form.value.branch === '' ? 'Branch is required' : ''
         };
         return;
     }
@@ -77,7 +77,7 @@ const submitForm = async () => {
         emit('submit', {
             question: form.value.question.trim(),
             answer: form.value.answer.trim(),
-            category: form.value.category
+            branch: form.value.branch
         });
 
         // Reset form after successful submission
@@ -144,19 +144,18 @@ const submitForm = async () => {
                     <InputError :message="errors.answer" class="mt-2" />
                 </div>
 
-                <!-- Category Select -->
+                <!-- Branch Select -->
                 <div>
-                    <InputLabel for="category" value="Category" />
-                    <select id="category" v-model="form.category"
+                    <InputLabel for="branch" value="Branch" />
+                    <select id="branch" v-model="form.branch"
                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': errors.category }">
-                        <option value="">Select category...</option>
-                        <option v-for="category in categories.filter(cat => cat !== 'All')" :key="category"
-                            :value="category">
-                            {{ category }}
-                        </option>
+                        :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500': errors.branch }">
+                        <option value="">Select branch...</option>
+                        <option value="BERTAM">Bertam</option>
+                        <option value="PADANG_SERAI">Padang Serai</option>
+                        <option value="IPOH">Ipoh</option>
                     </select>
-                    <InputError :message="errors.category" class="mt-2" />
+                    <InputError :message="errors.branch" class="mt-2" />
                 </div>
             </form>
         </div>

@@ -11,8 +11,8 @@ import Pagination from '@/Components/Pagination.vue';
 
 // State untuk FAQ data
 const faqData = ref([]);
-const categories = ref([]);
-const selectedCategory = ref('All');
+const branches = ref(['All', 'BERTAM', 'PADANG_SERAI', 'IPOH']);
+const selectedBranch = ref('All');
 const searchQuery = ref('');
 const loading = ref(true);
 const error = ref(null);
@@ -48,8 +48,8 @@ const fetchFAQData = async (page = 1) => {
             params.append('search', searchQuery.value);
         }
 
-        if (selectedCategory.value && selectedCategory.value !== 'All') {
-            params.append('category', selectedCategory.value);
+        if (selectedBranch.value && selectedBranch.value !== 'All') {
+            params.append('branch', selectedBranch.value);
         }
 
         console.log('Fetching FAQ data with params:', params.toString()); // Debug log
@@ -61,7 +61,7 @@ const fetchFAQData = async (page = 1) => {
             faqData.value = result.data;
             pagination.value = result.pagination;
             currentPage.value = result.pagination.current_page;
-            categories.value = ['All', ...result.categories];
+            // branches sudah di-hardcode, tidak perlu set dari API
         } else {
             error.value = 'Failed to load FAQ data';
         }
@@ -170,9 +170,9 @@ const handleSearchChange = (query) => {
     fetchFAQData(1);
 };
 
-// Handle category change
-const handleCategoryChange = (category) => {
-    selectedCategory.value = category;
+// Handle branch change
+const handleBranchChange = (branch) => {
+    selectedBranch.value = branch;
     currentPage.value = 1; // Reset to first page
     fetchFAQData(1);
 };
@@ -203,8 +203,8 @@ onMounted(() => {
         <div class="py-6">
             <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
                 <!-- Search dan Filter Section -->
-                <FAQSearch :search-query="searchQuery" :selected-category="selectedCategory" :categories="categories"
-                    @update:search-query="handleSearchChange" @update:selected-category="handleCategoryChange"
+                <FAQSearch :search-query="searchQuery" :selected-branch="selectedBranch" :branches="branches"
+                    @update:search-query="handleSearchChange" @update:selected-branch="handleBranchChange"
                     @add-faq="handleAddFAQ" />
 
                 <!-- Loading State -->
@@ -245,7 +245,7 @@ onMounted(() => {
                         </svg>
                         <h3 class="mt-2 text-sm font-medium text-gray-900">No questions found</h3>
                         <p class="mt-1 text-sm text-gray-500">
-                            Try changing the search keyword or select another category.
+                            Try changing the search keyword or select another branch.
                         </p>
                     </div>
                 </div>
@@ -257,7 +257,7 @@ onMounted(() => {
 
         <!-- Add FAQ Modal -->
         <Modal :show="showAddFAQModal" @close="closeAddFAQModal">
-            <AddFAQForm :categories="categories" :is-submitting="isSubmitting" :countdown-timer="countdownTimer"
+            <AddFAQForm :branches="branches" :is-submitting="isSubmitting" :countdown-timer="countdownTimer"
                 @close="closeAddFAQModal" @submit="handleFAQSubmit" />
         </Modal>
     </AuthenticatedLayout>

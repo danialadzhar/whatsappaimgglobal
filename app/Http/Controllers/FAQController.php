@@ -30,7 +30,7 @@ class FAQController extends Controller
         $validated = $request->validate([
             'question' => 'required|string|max:255',
             'answer' => 'required|string',
-            'category' => 'required|string|max:100',
+            'branch' => 'required|string|max:100',
         ]);
 
         try {
@@ -38,7 +38,7 @@ class FAQController extends Controller
             $faq = FAQ::create([
                 'question' => $validated['question'],
                 'answer' => $validated['answer'],
-                'category' => $validated['category'],
+                'branch' => $validated['branch'],
                 'is_active' => true,
                 'sort_order' => 0,
             ]);
@@ -71,7 +71,7 @@ class FAQController extends Controller
             $deletedFaq = [
                 'id' => $faq->id,
                 'question' => $faq->question,
-                'category' => $faq->category
+                'branch' => $faq->branch
             ];
 
             // Delete FAQ
@@ -105,9 +105,9 @@ class FAQController extends Controller
                 $query->search($request->search);
             }
 
-            // Apply category filter
-            if ($request->has('category') && $request->category) {
-                $query->byCategory($request->category);
+            // Apply branch filter
+            if ($request->has('branch') && $request->branch) {
+                $query->byBranch($request->branch);
             }
 
             // Pagination parameters
@@ -117,10 +117,10 @@ class FAQController extends Controller
             // Get paginated results
             $faqs = $query->paginate($perPage, ['*'], 'page', $page);
 
-            // Get unique categories
-            $categories = FAQ::active()
+            // Get unique branches
+            $branches = FAQ::active()
                 ->distinct()
-                ->pluck('category')
+                ->pluck('branch')
                 ->filter()
                 ->values()
                 ->toArray();
@@ -136,7 +136,7 @@ class FAQController extends Controller
                     'from' => $faqs->firstItem(),
                     'to' => $faqs->lastItem(),
                 ],
-                'categories' => $categories
+                'branches' => $branches
             ]);
         } catch (Exception $e) {
             return response()->json([

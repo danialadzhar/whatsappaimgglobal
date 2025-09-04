@@ -24,7 +24,7 @@ class FAQ extends Model
     protected $fillable = [
         'question',
         'answer',
-        'category',
+        'branch',
         'is_active',
         'sort_order',
     ];
@@ -56,12 +56,12 @@ class FAQ extends Model
     }
 
     /**
-     * Scope to filter by category
+     * Scope to filter by branch
      */
-    public function scopeByCategory($query, $category)
+    public function scopeByBranch($query, $branch)
     {
-        if ($category && $category !== 'All') {
-            return $query->where('category', $category);
+        if ($branch && $branch !== 'All') {
+            return $query->where('branch', $branch);
         }
         return $query;
     }
