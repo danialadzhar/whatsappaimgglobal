@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\FAQ;
-use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Exception;
 
 class FAQController extends Controller
 {
@@ -58,6 +58,44 @@ class FAQController extends Controller
     }
 
     /**
+     * Update FAQ
+     * Update existing FAQ in database
+     */
+    public function update(Request $request, $id)
+    {
+        // Validate the request
+        $validated = $request->validate([
+            'question' => 'required|string|max:255',
+            'answer' => 'required|string',
+            'branch' => 'required|string|max:100',
+        ]);
+
+        try {
+            // Find FAQ by ID
+            $faq = FAQ::findOrFail($id);
+
+            // Update FAQ
+            $faq->update([
+                'question' => $validated['question'],
+                'answer' => $validated['answer'],
+                'branch' => $validated['branch'],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'FAQ successfully updated!',
+                'data' => $faq
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update FAQ',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Delete FAQ
      * Delete FAQ from database
      */
@@ -79,13 +117,13 @@ class FAQController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'FAQ berjaya dihapus!',
+                'message' => 'FAQ successfully deleted!',
                 'data' => $deletedFaq
             ], 200);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus FAQ',
+                'message' => 'Failed to delete FAQ',
                 'error' => $e->getMessage()
             ], 500);
         }
