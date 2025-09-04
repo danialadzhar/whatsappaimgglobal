@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // FAQ API Routes (without CSRF protection)
 Route::get('/faq/db', [FAQController::class, 'getFAQDataFromDB'])->name('api.faq.db');
 Route::post('/faq', [FAQController::class, 'store'])->name('api.faq.store')->withoutMiddleware(['web']);
+Route::delete('/faq/{id}', [FAQController::class, 'destroy'])->name('api.faq.destroy')->withoutMiddleware(['web']);
 
 // Customer API Routes (without CSRF protection for n8n integration)
 Route::post('/customers', [CustomerController::class, 'store'])->name('api.customers.store');

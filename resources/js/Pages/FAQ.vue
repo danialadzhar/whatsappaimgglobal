@@ -155,6 +155,13 @@ const handlePageChange = (page) => {
     fetchFAQData(page);
 };
 
+// Handle delete FAQ
+const handleDeleteFAQ = (faq) => {
+    // Untuk sekarang, hanya console.log dulu
+    console.log('Delete FAQ:', faq);
+    alert(`Delete FAQ: ${faq.question}`);
+};
+
 // Handle search change
 const handleSearchChange = (query) => {
     console.log('Search changed to:', query); // Debug log
@@ -220,7 +227,7 @@ onMounted(() => {
                 </div>
 
                 <!-- FAQ Accordion -->
-                <FAQAccordion v-else-if="faqData.length > 0" :faq-items="faqData" />
+                <FAQAccordion v-else-if="faqData.length > 0" :faq-items="faqData" @refresh-data="fetchFAQData" />
 
                 <!-- Pagination -->
                 <Pagination v-if="faqData.length > 0 && pagination.last_page > 1"

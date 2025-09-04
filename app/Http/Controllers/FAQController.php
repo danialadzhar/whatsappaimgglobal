@@ -58,6 +58,40 @@ class FAQController extends Controller
     }
 
     /**
+     * Delete FAQ
+     * Delete FAQ from database
+     */
+    public function destroy($id)
+    {
+        try {
+            // Find FAQ by ID
+            $faq = FAQ::findOrFail($id);
+
+            // Store FAQ data untuk response
+            $deletedFaq = [
+                'id' => $faq->id,
+                'question' => $faq->question,
+                'category' => $faq->category
+            ];
+
+            // Delete FAQ
+            $faq->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'FAQ berjaya dihapus!',
+                'data' => $deletedFaq
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus FAQ',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get FAQ data from database
      * Get FAQ data in JSON format for API from database
      */

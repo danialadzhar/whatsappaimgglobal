@@ -24,24 +24,24 @@ class DashboardController extends Controller
         // Calculate response rate percentage
         $totalMessages = MessageLog::count();
         $responseRate = 0;
-        
+
         if ($totalMessages > 0) {
             // Count messages with AI response (ai_messages is not null and not empty)
             $messagesWithResponse = MessageLog::whereNotNull('ai_messages')
                 ->where('ai_messages', '!=', '')
                 ->get();
-            
+
             $goodResponses = 0;
             foreach ($messagesWithResponse as $message) {
                 // Calculate response time in minutes
                 $responseTimeMinutes = $message->updated_at->diffInMinutes($message->created_at);
-                
+
                 // If response time is 1 minute or less, it's a good response
                 if ($responseTimeMinutes <= 1) {
                     $goodResponses++;
                 }
             }
-            
+
             // Calculate response rate percentage
             $responseRate = ($goodResponses / $totalMessages) * 100;
         }

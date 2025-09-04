@@ -108,7 +108,7 @@ const supportItems = ref([
                     </div>
 
                     <!-- Support Section -->
-                    <div class="mt-8 px-3">
+                    <!-- <div class="mt-8 px-3">
                         <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Support</p>
                         <nav class="mt-2 space-y-1">
                             <a v-for="item in supportItems" :key="item.name" :href="item.href"
@@ -117,7 +117,7 @@ const supportItems = ref([
                                 {{ item.name }}
                             </a>
                         </nav>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
