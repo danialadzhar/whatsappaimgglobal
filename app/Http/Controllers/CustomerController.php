@@ -204,4 +204,44 @@ class CustomerController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get message logs data for dashboard table.
+     * Dapatkan data message logs untuk dashboard table
+     */
+    public function getMessageLogs(Request $request)
+    {
+        try {
+            // Get message logs with customer relationship
+            $messageLogs = MessageLog::with('customer')
+                ->orderBy('created_at', 'desc')
+                ->limit(1) // Limit to 10 recent messages
+                ->get();
+
+            // Format data for table display
+            $formattedData = $messageLogs->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'customer_name' => $log->customer->name ?? 'Unknown Customer',
+                    'last_customer_message' => $log->customer_messages,
+                    'created_at' => $log->created_at->format('d-m-Y'),
+                    'created_at_raw' => $log->created_at
+                ];
+            });
+
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Message logs berjaya diambil',
+                'data' => $formattedData
+            ], 200);
+        } catch (\Exception $e) {
+            // Return error response
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil message logs',
+                'data' => []
+            ], 500);
+        }
+    }
 }

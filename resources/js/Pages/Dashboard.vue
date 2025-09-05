@@ -61,36 +61,7 @@ const responseTimeData = ref({
     chartLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 });
 
-// Data untuk recent conversations
-const recentConversations = ref([
-    {
-        id: 1,
-        name: 'Ahmad Rahman',
-        company: '+60123456789',
-        amount: 15,
-        date: '2024-01-27',
-        type: 'Product Inquiry',
-        status: 'Replied'
-    },
-    {
-        id: 2,
-        name: 'Siti Aminah',
-        company: '+60198765432',
-        amount: 8,
-        date: '2024-01-27',
-        type: 'Support',
-        status: 'Pending'
-    },
-    {
-        id: 3,
-        name: 'Muhammad Ali',
-        company: '+60187654321',
-        amount: 23,
-        date: '2024-01-26',
-        type: 'Order Status',
-        status: 'Replied'
-    }
-]);
+// TransactionTable component will handle its own data fetching from message_logs table
 
 // Fungsi untuk handle action click
 const handleActionClick = (actionRoute) => {
@@ -141,7 +112,7 @@ const handleActionClick = (actionRoute) => {
                 </div>
 
                 <!-- Recent Conversations Table -->
-                <TransactionTable :transactions="recentConversations" />
+                <TransactionTable />
             </div>
         </div>
     </AuthenticatedLayout>

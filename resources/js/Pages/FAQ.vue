@@ -236,7 +236,7 @@ onMounted(() => {
                     @page-change="handlePageChange" />
 
                 <!-- No Results -->
-                <div v-else class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div v-else class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-4">
                     <div class="p-6 text-center">
                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">

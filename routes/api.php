@@ -33,3 +33,4 @@ Route::get('/customers/phone', [CustomerController::class, 'getCustomerByPhone']
 
 // Message Logs API Routes (without CSRF protection for n8n integration)
 Route::post('/message-logs', [CustomerController::class, 'storeMessageLog'])->name('api.message-logs.store');
+Route::get('/message-logs', [CustomerController::class, 'getMessageLogs'])->name('api.message-logs.index');
