@@ -108,9 +108,37 @@ const handleActionClick = (actionRoute) => {
                     <StatCard title="Daily Conversations" :amount="props.conversation.weeklyTotal ?? 0"
                         :chart-data="conversationData.chartData" :chart-labels="conversationData.chartLabels"
                         label-text="conversations" type="income" />
-                    <StatCard title="Avg Response Time (sec)" :amount="responseTimeData.amount"
-                        :percentage="responseTimeData.percentage" :chart-data="responseTimeData.chartData"
-                        :chart-labels="responseTimeData.chartLabels" type="spent" />
+                    <!-- Avg Response Time - Not Ready State -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium text-gray-900">Avg Response Time (sec)</h3>
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                                <span class="text-xs text-orange-600 font-medium">Coming Soon</span>
+                            </div>
+                        </div>
+
+                        <!-- Content Area -->
+                        <div class="text-center py-8">
+                            <!-- Icon -->
+                            <div
+                                class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+
+                            <!-- Message -->
+                            <h4 class="text-lg font-medium text-gray-700 mb-2">Feature in Development</h4>
+                            <p class="text-sm text-gray-500 leading-relaxed">
+                                Response time analytics will be available soon. We're working on integrating real-time
+                                performance metrics.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Recent Conversations Table -->
