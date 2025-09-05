@@ -3,19 +3,12 @@
         <!-- Header dengan dropdown tahun -->
         <div class="flex items-center justify-between mb-6">
             <h3 class="font-semibold text-gray-900">{{ title }}</h3>
-            <div class="relative">
-                <select class="text-sm text-gray-600 bg-transparent border-none outline-none cursor-pointer pr-6">
-                    <option>This Year</option>
-                    <option>Last Year</option>
-                </select>
-            </div>
         </div>
 
-        <!-- Amount dengan percentage -->
+        <!-- Amount dengan optional percentage -->
         <div class="mb-6">
             <div class="flex items-center gap-3 mb-2">
-
-                <span class="flex items-center text-sm font-medium px-2 py-1 rounded-full" :class="percentageClass">
+                <span v-if="showPercentage" class="flex items-center text-sm font-medium px-2 py-1 rounded-full" :class="percentageClass">
                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             :d="isPositive ? 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' : 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6'">
@@ -25,7 +18,7 @@
                 </span>
                 <div class="flex items-baseline gap-2">
                     <span class="text-2xl font-bold text-gray-900">{{ formattedAmount }}</span>
-                    <span class="text-sm text-gray-500">conversations</span>
+                    <span class="text-sm text-gray-500">{{ labelText }}</span>
                 </div>
             </div>
         </div>
@@ -64,7 +57,8 @@ const props = defineProps({
     },
     percentage: {
         type: Number,
-        required: true
+        required: false,
+        default: null
     },
     chartData: {
         type: Array,
@@ -77,6 +71,10 @@ const props = defineProps({
     type: {
         type: String,
         default: 'income' // 'income' atau 'spent'
+    },
+    labelText: {
+        type: String,
+        default: 'conversations'
     }
 })
 
@@ -86,7 +84,9 @@ const formattedAmount = computed(() => {
 })
 
 // Tentukan warna berdasarkan jenis dan percentage
-const isPositive = computed(() => props.percentage >= 0)
+const isPositive = computed(() => (props.percentage ?? 0) >= 0)
+
+const showPercentage = computed(() => props.percentage !== null && props.percentage !== undefined)
 
 const percentageClass = computed(() => {
     if (props.type === 'spent') {

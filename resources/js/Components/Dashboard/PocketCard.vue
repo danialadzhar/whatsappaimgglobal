@@ -18,7 +18,7 @@
         </div>
 
         <!-- Action Button -->
-        <button @click="handleActionClick"
+        <button v-if="actionText" @click="handleActionClick"
             class="flex items-center justify-between w-full p-3 hover:bg-gray-50 rounded-lg transition-colors group">
             <span class="text-sm text-gray-700">{{ actionText }}</span>
             <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none"
@@ -59,7 +59,7 @@ const props = defineProps({
     },
     actionText: {
         type: String,
-        default: 'View Details'
+        default: ''
     },
     actionRoute: {
         type: String,

@@ -11,6 +11,11 @@ const props = defineProps({
     stats: {
         type: Object,
         required: true
+    },
+    conversation: {
+        type: Object,
+        required: false,
+        default: () => ({ today: 0, weeklyTotal: 0, series: [], labels: [] })
     }
 });
 
@@ -32,8 +37,7 @@ const chatbotStats = computed(() => [
         count: props.stats.totalMessages || 0,
         subtitle: 'Total messages',
         icon: '💬',
-        iconBgClass: 'bg-green-100',
-        actionText: 'View Messages'
+        iconBgClass: 'bg-green-100'
     },
     {
         title: 'Response Rate',
@@ -41,18 +45,16 @@ const chatbotStats = computed(() => [
         count: props.stats.responseRate || 0,
         subtitle: 'Percentage of fast responses',
         icon: '⚡',
-        iconBgClass: 'bg-green-100',
-        actionText: 'View Analytics'
+        iconBgClass: 'bg-green-100'
     }
 ]);
 
-// Data untuk charts - Conversation Analytics
-const conversationData = ref({
-    amount: 2847,
-    percentage: 12.5,
-    chartData: [45, 52, 48, 61, 55, 67, 72],
-    chartLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-});
+// Data untuk charts - Conversation Analytics (guna data sebenar)
+const conversationData = computed(() => ({
+    amount: props.conversation.today ?? 0,
+    chartData: props.conversation.series ?? [],
+    chartLabels: props.conversation.labels ?? []
+}))
 
 const responseTimeData = ref({
     amount: 2.3,
@@ -84,10 +86,10 @@ const handleActionClick = (actionRoute) => {
                     </h2>
                     <p class="text-sm text-gray-600 mt-1">Monitor conversation statistics and user engagement</p>
                 </div>
-                <div class="flex items-center gap-3">
+                <!-- <div class="flex items-center gap-3">
                     <input type="search" placeholder="Search conversations..."
                         class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
+                </div> -->
             </div>
         </template>
 
@@ -103,9 +105,9 @@ const handleActionClick = (actionRoute) => {
 
                 <!-- Analytics Cards Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <StatCard title="Daily Conversations" :amount="conversationData.amount"
-                        :percentage="conversationData.percentage" :chart-data="conversationData.chartData"
-                        :chart-labels="conversationData.chartLabels" type="income" />
+                    <StatCard title="Daily Conversations" :amount="props.conversation.weeklyTotal ?? 0"
+                        :chart-data="conversationData.chartData" :chart-labels="conversationData.chartLabels"
+                        label-text="conversations" type="income" />
                     <StatCard title="Avg Response Time (sec)" :amount="responseTimeData.amount"
                         :percentage="responseTimeData.percentage" :chart-data="responseTimeData.chartData"
                         :chart-labels="responseTimeData.chartLabels" type="spent" />

@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\MessageLog;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -53,8 +54,39 @@ class DashboardController extends Controller
             'responseRate' => $responseRate
         ];
 
+        // Conversation analytics: today, last 7 days series, and weekly total
+        $today = Carbon::today();
+        $startDate = (clone $today)->subDays(6);
+
+        // Get counts grouped by date within the last 7 days
+        $counts = MessageLog::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->whereBetween('created_at', [$startDate->startOfDay(), $today->endOfDay()])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $series = [];
+        $labels = [];
+        $cursor = $startDate->copy();
+        while ($cursor->lte($today)) {
+            $dateKey = $cursor->toDateString();
+            $series[] = (int) ($counts[$dateKey]->count ?? 0);
+            $labels[] = $cursor->format('D'); // Mon, Tue, ...
+            $cursor->addDay();
+        }
+
+        $todayCount = MessageLog::whereDate('created_at', $today)->count();
+        $weeklyTotal = array_sum($series);
+
         return Inertia::render('Dashboard', [
-            'stats' => $dashboardStats
+            'stats' => $dashboardStats,
+            'conversation' => [
+                'today' => $todayCount,
+                'weeklyTotal' => $weeklyTotal,
+                'series' => $series,
+                'labels' => $labels,
+            ],
         ]);
     }
 }
