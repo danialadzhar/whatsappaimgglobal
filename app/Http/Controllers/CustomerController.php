@@ -205,31 +205,42 @@ class CustomerController extends Controller
     public function getMessageLogs(Request $request)
     {
         try {
-            // Get message logs with customer relationship
-            $messageLogs = MessageLog::with('customer')
-                ->orderBy('created_at', 'desc')
-                ->limit(1) // Limit to 10 recent messages
+            // Dapatkan mesej terakhir bagi setiap customer_id
+            // SQL equivalent:
+            // SELECT ml.* FROM message_logs ml
+            // JOIN (SELECT customer_id, MAX(created_at) AS max_created_at FROM message_logs GROUP BY customer_id) latest
+            //   ON latest.customer_id = ml.customer_id AND latest.max_created_at = ml.created_at
+            // ORDER BY ml.created_at DESC
+
+            $sub = MessageLog::selectRaw('customer_id, MAX(created_at) as max_created_at')
+                ->groupBy('customer_id');
+
+            $messageLogs = MessageLog::select('message_logs.*')
+                ->joinSub($sub, 'latest', function ($join) {
+                    $join->on('message_logs.customer_id', '=', 'latest.customer_id')
+                        ->on('message_logs.created_at', '=', 'latest.max_created_at');
+                })
+                ->with('customer')
+                ->orderBy('message_logs.created_at', 'desc')
                 ->get();
 
-            // Format data for table display
+            // Format data untuk paparan jadual
             $formattedData = $messageLogs->map(function ($log) {
                 return [
                     'id' => $log->id,
                     'customer_name' => $log->customer->name ?? 'Unknown Customer',
                     'last_customer_message' => $log->customer_messages,
                     'created_at' => $log->created_at->format('d-m-Y'),
-                    'created_at_raw' => $log->created_at
+                    'created_at_raw' => $log->created_at,
                 ];
             });
 
-            // Return success response
             return response()->json([
                 'success' => true,
                 'message' => 'Message logs berjaya diambil',
-                'data' => $formattedData
+                'data' => $formattedData,
             ], 200);
         } catch (\Exception $e) {
-            // Return error response
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengambil message logs',

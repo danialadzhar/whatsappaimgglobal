@@ -28,7 +28,7 @@ const chatbotStats = computed(() => [
         subtitle: 'Active customers this month',
         icon: '👥',
         iconBgClass: 'bg-blue-100',
-        actionText: 'View All Customer',
+        actionText: 'View All Customers',
         actionRoute: 'customers'
     },
     {
@@ -41,7 +41,7 @@ const chatbotStats = computed(() => [
     },
     {
         title: 'Response Rate',
-        description: 'AI response dalam masa 1 minit',
+        description: 'AI response in 1 minute',
         count: props.stats.responseRate || 0,
         subtitle: 'Percentage of fast responses',
         icon: '⚡',
