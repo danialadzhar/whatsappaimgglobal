@@ -184,4 +184,49 @@ class FAQController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get all FAQ data without pagination
+     * Return semua FAQ data untuk API integration
+     */
+    public function getAllFAQData(Request $request)
+    {
+        try {
+            $query = FAQ::active()->ordered();
+
+            // Apply search filter
+            if ($request->has('search') && $request->search) {
+                $query->search($request->search);
+            }
+
+            // Apply branch filter
+            if ($request->has('branch') && $request->branch) {
+                $query->byBranch($request->branch);
+            }
+
+            // Get all results without pagination
+            $faqs = $query->get();
+
+            // Get unique branches
+            $branches = FAQ::active()
+                ->distinct()
+                ->pluck('branch')
+                ->filter()
+                ->values()
+                ->toArray();
+
+            return response()->json([
+                'success' => true,
+                'data' => $faqs,
+                'total' => $faqs->count(),
+                'branches' => $branches
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch all FAQ data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

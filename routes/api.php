@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // FAQ API Routes (without CSRF protection)
 Route::get('/faq/db', [FAQController::class, 'getFAQDataFromDB'])->name('api.faq.db');
+Route::get('/faq/all', [FAQController::class, 'getAllFAQData'])->name('api.faq.all');
 Route::post('/faq', [FAQController::class, 'store'])->name('api.faq.store')->withoutMiddleware(['web']);
 Route::put('/faq/{id}', [FAQController::class, 'update'])->name('api.faq.update')->withoutMiddleware(['web']);
 Route::delete('/faq/{id}', [FAQController::class, 'destroy'])->name('api.faq.destroy')->withoutMiddleware(['web']);
