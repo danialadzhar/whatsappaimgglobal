@@ -107,17 +107,14 @@ const supportItems = ref([
                         </nav>
                     </div>
 
-                    <!-- Support Section -->
-                    <!-- <div class="mt-8 px-3">
-                        <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Support</p>
-                        <nav class="mt-2 space-y-1">
-                            <a v-for="item in supportItems" :key="item.name" :href="item.href"
-                                class="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-l-lg">
-                                <span class="text-lg mr-3">{{ item.icon }}</span>
-                                {{ item.name }}
-                            </a>
-                        </nav>
-                    </div> -->
+                    <!-- Logout Button -->
+                    <div class="mt-auto px-3 pb-6">
+                        <Link :href="route('logout')" method="post" as="button"
+                            class="w-full group flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors duration-200">
+                        <span class="text-lg mr-3">🚪</span>
+                        Logout
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
