@@ -49,49 +49,42 @@ class CustomerController extends Controller
     }
 
     /**
-     * Get customer data from database for API.
-     * Dapatkan data customer dari database untuk API
+     * Get customer data from database by phone number for API.
+     * Dapatkan data customer dari database berdasarkan phone number untuk API
      */
-    public function getCustomerDataFromDB(Request $request)
+    public function getCustomerDataFromDB($phone_number)
     {
         try {
-            // Get all customers with optional search parameter
-            $query = Customer::query();
+            // Find customer by phone number
+            $customer = Customer::where('phone_number', $phone_number)->first();
 
-            // Apply search filter if provided
-            if ($request->has('search') && !empty($request->search)) {
-                $searchTerm = $request->search;
-                $query->where(function ($q) use ($searchTerm) {
-                    $q->where('name', 'like', '%' . $searchTerm . '%')
-                        ->orWhere('phone_number', 'like', '%' . $searchTerm . '%');
-                });
-            }
-
-            // Apply pagination if requested
-            $perPage = $request->get('per_page', 15);
-            $customers = $query->orderBy('created_at', 'desc')->paginate($perPage);
-
-            // Return API response
-            return response()->json([
-                'success' => true,
-                'message' => 'Data customer berjaya diambil',
-                'data' => [
-                    'customers' => $customers->items(),
-                    'pagination' => [
-                        'current_page' => $customers->currentPage(),
-                        'last_page' => $customers->lastPage(),
-                        'per_page' => $customers->perPage(),
-                        'total' => $customers->total(),
-                        'from' => $customers->firstItem(),
-                        'to' => $customers->lastItem(),
+            if ($customer) {
+                // Return customer data if found
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Customer ditemui',
+                    'data' => [
+                        'customer' => $customer,
+                        'found' => true
                     ]
-                ]
-            ], 200);
+                ], 200);
+            } else {
+                // Return not found response
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Customer tidak ditemui dengan phone number: ' . $phone_number,
+                    'data' => [
+                        'customer' => null,
+                        'found' => false,
+                        'searched_phone' => $phone_number
+                    ]
+                ], 404);
+            }
         } catch (\Exception $e) {
             // Return error response
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengambil data customer',
+                'message' => 'Gagal mencari customer',
                 'data' => null
             ], 500);
         }
