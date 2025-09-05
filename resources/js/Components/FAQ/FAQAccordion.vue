@@ -217,7 +217,7 @@ const deleteFAQ = async (faq) => {
 
 <template>
     <div class="space-y-4">
-        <div v-for="faq in faqItems" :key="faq.id" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div v-for="(faq, index) in faqItems" :key="faq.id" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="flex items-stretch">
                 <!-- Question Header -->
                 <button @click="toggleAccordion(faq.id)"
@@ -226,6 +226,10 @@ const deleteFAQ = async (faq) => {
                     <div class="flex items-center justify-between">
                         <div class="flex-1">
                             <h3 class="text-lg font-medium text-gray-900">
+                                <span
+                                    class="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full mr-3">
+                                    {{ index + 1 }}
+                                </span>
                                 {{ faq.question }}
                             </h3>
                             <div class="mt-1 flex items-center space-x-2">
