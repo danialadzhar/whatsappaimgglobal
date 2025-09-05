@@ -69,16 +69,16 @@ class CustomerController extends Controller
                     ]
                 ], 200);
             } else {
-                // Return not found response
+                // Return false if customer not found
                 return response()->json([
-                    'success' => true,
+                    'success' => false,
                     'message' => 'Customer tidak ditemui dengan phone number: ' . $phone_number,
                     'data' => [
                         'customer' => null,
                         'found' => false,
                         'searched_phone' => $phone_number
                     ]
-                ], 404);
+                ], 200);
             }
         } catch (\Exception $e) {
             // Return error response
