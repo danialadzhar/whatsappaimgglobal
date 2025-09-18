@@ -3,6 +3,7 @@
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,3 +41,7 @@ Route::get('/message-logs', [CustomerController::class, 'getMessageLogs'])->name
 // Chat API Routes (without CSRF protection)
 Route::get('/chat/messages/{customerId}', [ChatController::class, 'getMessages'])->name('api.chat.messages');
 Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('api.chat.send')->withoutMiddleware(['web']);
+
+// Settings API Routes (without CSRF protection)
+Route::post('/settings/chatbot-toggle', [SettingsController::class, 'toggleChatbot'])->name('api.settings.chatbot-toggle')->withoutMiddleware(['web']);
+Route::get('/settings/chatbot-status', [SettingsController::class, 'getChatbotStatus'])->name('api.settings.chatbot-status');

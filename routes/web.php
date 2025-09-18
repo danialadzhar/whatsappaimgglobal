@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -33,6 +34,9 @@ Route::middleware('auth')->group(function () {
 
     // Chat Routes
     Route::get('/chat', [ChatController::class, 'index'])->name('chat');
+
+    // Settings Routes
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
 });
 
 // API Routes moved to routes/api.php for consistency

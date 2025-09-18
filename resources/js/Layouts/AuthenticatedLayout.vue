@@ -35,6 +35,12 @@ const navigationItems = ref([
         icon: '💬',
         active: false
     },
+    {
+        name: 'Settings',
+        href: 'settings',
+        icon: '⚙️',
+        active: false
+    },
     //   {
     //     name: 'Cards',
     //     href: '#',
@@ -100,7 +106,7 @@ const supportItems = ref([
                         <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">General</p>
                         <nav class="mt-2 space-y-1">
                             <Link v-for="item in navigationItems" :key="item.name"
-                                :href="item.href === 'dashboard' || item.href === 'customers' ? route(item.href) : item.href"
+                                :href="['dashboard', 'customers', 'faq', 'chat', 'settings'].includes(item.href) ? route(item.href) : item.href"
                                 :class="[
                                     item.active
                                         ? 'bg-blue-50 border-r-2 border-blue-600 text-blue-700'
