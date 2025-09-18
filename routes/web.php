@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ChatController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -29,6 +30,9 @@ Route::middleware('auth')->group(function () {
     // Customer Routes
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+
+    // Chat Routes
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat');
 });
 
 // API Routes moved to routes/api.php for consistency

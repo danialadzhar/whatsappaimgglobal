@@ -23,4 +23,13 @@ class Customer extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Get message logs for this customer
+     * Dapatkan message logs untuk customer ini
+     */
+    public function messageLogs()
+    {
+        return $this->hasMany(MessageLog::class);
+    }
 }

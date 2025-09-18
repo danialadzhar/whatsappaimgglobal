@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ChatController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,3 +36,7 @@ Route::get('/customers/phone', [CustomerController::class, 'getCustomerByPhone']
 // Message Logs API Routes (without CSRF protection for n8n integration)
 Route::post('/message-logs', [CustomerController::class, 'storeMessageLog'])->name('api.message-logs.store');
 Route::get('/message-logs', [CustomerController::class, 'getMessageLogs'])->name('api.message-logs.index');
+
+// Chat API Routes (without CSRF protection)
+Route::get('/chat/messages/{customerId}', [ChatController::class, 'getMessages'])->name('api.chat.messages');
+Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('api.chat.send')->withoutMiddleware(['web']);

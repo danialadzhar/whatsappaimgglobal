@@ -29,6 +29,12 @@ const navigationItems = ref([
         icon: '👥',
         active: false
     },
+    {
+        name: 'Chat',
+        href: 'chat',
+        icon: '💬',
+        active: false
+    },
     //   {
     //     name: 'Cards',
     //     href: '#',
@@ -205,7 +211,7 @@ const supportItems = ref([
                         <div class="flex items-center">
                             <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
                                 <span class="text-sm font-medium text-gray-700">{{ $page.props.auth.user.name.charAt(0)
-                                }}</span>
+                                    }}</span>
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm font-medium text-gray-700">{{ $page.props.auth.user.name }}</p>
