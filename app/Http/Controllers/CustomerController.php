@@ -302,4 +302,111 @@ class CustomerController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Update customer services_mode if phone number exists and matches.
+     * Kemas kini services_mode customer jika phone number wujud dan padan
+     */
+    public function updateServicesModeByPhone(Request $request)
+    {
+        try {
+            // Validate input data
+            $request->validate([
+                'phone_number' => 'required|string|max:20',
+                'services_mode' => 'required|integer|min:0',
+            ]);
+
+            $phoneNumber = $request->phone_number;
+
+            // Cari customer berdasarkan phone number (mesti sama)
+            $customer = Customer::where('phone_number', $phoneNumber)->first();
+
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer tidak ditemui dengan phone number: ' . $phoneNumber,
+                    'data' => null
+                ], 404);
+            }
+
+            // Update services_mode customer
+            $customer->services_mode = $request->services_mode;
+            $customer->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Services mode customer berjaya dikemas kini!',
+                'data' => [
+                    'customer' => $customer,
+                ]
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors(),
+                'data' => null
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengemas kini services mode customer',
+                'data' => null
+            ], 500);
+        }
+    }
+
+    /**
+     * Check if customer services_mode is null by phone number.
+     * Semak sama ada services_mode customer adalah null berdasarkan phone number
+     */
+    public function checkServicesModeIsNull(Request $request)
+    {
+        try {
+            // Validate input data
+            $request->validate([
+                'phone_number' => 'required|string|max:20',
+            ]);
+
+            $phoneNumber = $request->phone_number;
+
+            // Cari customer berdasarkan phone number (mesti sama)
+            $customer = Customer::where('phone_number', $phoneNumber)->first();
+
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer tidak ditemui dengan phone number: ' . $phoneNumber,
+                    'data' => null
+                ], 404);
+            }
+
+            // Check if services_mode is null - return true if null, false if not null
+            $isNull = is_null($customer->services_mode);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Services mode status berjaya disemak',
+                'data' => [
+                    'phone_number' => $phoneNumber,
+                    'customer_name' => $customer->name,
+                    'services_mode' => $customer->services_mode,
+                    'is_null' => $isNull
+                ]
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors(),
+                'data' => null
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyemak services mode customer',
+                'data' => null
+            ], 500);
+        }
+    }
 }

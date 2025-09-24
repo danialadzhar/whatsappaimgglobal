@@ -34,6 +34,8 @@ Route::post('/customers', [CustomerController::class, 'store'])->name('api.custo
 Route::get('/customers/db/{phone_number}', [CustomerController::class, 'getCustomerDataFromDB'])->name('api.customers.db');
 Route::get('/customers/phone', [CustomerController::class, 'getCustomerByPhone'])->name('api.customers.phone');
 Route::post('/customers/update-name', [CustomerController::class, 'updateNameByPhone'])->name('api.customers.update-name');
+Route::post('/customers/update-services-mode', [CustomerController::class, 'updateServicesModeByPhone'])->name('api.customers.update-services-mode');
+Route::post('/customers/check-services-mode', [CustomerController::class, 'checkServicesModeIsNull'])->name('api.customers.check-services-mode');
 
 // Message Logs API Routes (without CSRF protection for n8n integration)
 Route::post('/message-logs', [CustomerController::class, 'storeMessageLog'])->name('api.message-logs.store');

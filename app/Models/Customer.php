@@ -13,6 +13,7 @@ class Customer extends Model
     protected $fillable = [
         'name',
         'phone_number',
+        'services_mode',
     ];
 
     /**
@@ -20,6 +21,7 @@ class Customer extends Model
      * Cast attributes untuk data types
      */
     protected $casts = [
+        'services_mode' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
