@@ -33,6 +33,7 @@ Route::delete('/faq/{id}', [FAQController::class, 'destroy'])->name('api.faq.des
 Route::post('/customers', [CustomerController::class, 'store'])->name('api.customers.store');
 Route::get('/customers/db/{phone_number}', [CustomerController::class, 'getCustomerDataFromDB'])->name('api.customers.db');
 Route::get('/customers/phone', [CustomerController::class, 'getCustomerByPhone'])->name('api.customers.phone');
+Route::post('/customers/update-name', [CustomerController::class, 'updateNameByPhone'])->name('api.customers.update-name');
 
 // Message Logs API Routes (without CSRF protection for n8n integration)
 Route::post('/message-logs', [CustomerController::class, 'storeMessageLog'])->name('api.message-logs.store');

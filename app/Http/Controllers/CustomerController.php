@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\MessageLog;
 use Illuminate\Http\Request;
+use Throwable;
 use Inertia\Inertia;
 
 class CustomerController extends Controller
@@ -80,7 +81,7 @@ class CustomerController extends Controller
                     ]
                 ], 200);
             }
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             // Return error response
             return response()->json([
                 'success' => false,
@@ -137,7 +138,7 @@ class CustomerController extends Controller
                 'errors' => $e->errors(),
                 'data' => null
             ], 422);
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             // Return error response
             return response()->json([
                 'success' => false,
@@ -188,7 +189,7 @@ class CustomerController extends Controller
                 'errors' => $e->errors(),
                 'data' => null
             ], 422);
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             // Return error response
             return response()->json([
                 'success' => false,
@@ -240,11 +241,64 @@ class CustomerController extends Controller
                 'message' => 'Message logs berjaya diambil',
                 'data' => $formattedData,
             ], 200);
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengambil message logs',
                 'data' => []
+            ], 500);
+        }
+    }
+
+    /**
+     * Update customer name if phone number exists and matches.
+     * Kemas kini nama customer jika phone number wujud dan padan
+     */
+    public function updateNameByPhone(Request $request)
+    {
+        try {
+            // Validate input data
+            $request->validate([
+                'phone_number' => 'required|string|max:20',
+                'name' => 'required|string|max:255',
+            ]);
+
+            $phoneNumber = $request->phone_number;
+
+            // Cari customer berdasarkan phone number (mesti sama)
+            $customer = Customer::where('phone_number', $phoneNumber)->first();
+
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer tidak ditemui dengan phone number: ' . $phoneNumber,
+                    'data' => null
+                ], 404);
+            }
+
+            // Update nama customer
+            $customer->name = $request->name;
+            $customer->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nama customer berjaya dikemas kini!',
+                'data' => [
+                    'customer' => $customer,
+                ]
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors(),
+                'data' => null
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengemas kini nama customer',
+                'data' => null
             ], 500);
         }
     }
