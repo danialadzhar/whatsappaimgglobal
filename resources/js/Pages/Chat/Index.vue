@@ -55,6 +55,60 @@ const searchQuery = ref('');
 const loading = ref(false);
 const POLLING_INTERVAL_MS = 2000;
 let pollingTimer = null;
+let notificationAudio = null;
+let isAudioUnlocked = false;
+let audioListenersAttached = false;
+
+const detachAudioUnlockListeners = () => {
+    if (!audioListenersAttached) return;
+    document.removeEventListener('click', unlockAudioOnInteraction);
+    document.removeEventListener('keydown', unlockAudioOnInteraction);
+    audioListenersAttached = false;
+};
+
+const attachAudioUnlockListeners = () => {
+    if (audioListenersAttached || isAudioUnlocked) return;
+    document.addEventListener('click', unlockAudioOnInteraction, { once: false });
+    document.addEventListener('keydown', unlockAudioOnInteraction, { once: false });
+    audioListenersAttached = true;
+};
+
+function unlockAudioOnInteraction() {
+    if (!notificationAudio) return;
+
+    notificationAudio
+        .play()
+        .then(() => {
+            notificationAudio.pause();
+            notificationAudio.currentTime = 0;
+            isAudioUnlocked = true;
+            detachAudioUnlockListeners();
+        })
+        .catch(() => {
+            isAudioUnlocked = false;
+        });
+}
+
+const playNotificationSound = () => {
+    if (!notificationAudio) return;
+
+    if (!isAudioUnlocked) {
+        attachAudioUnlockListeners();
+        return;
+    }
+
+    try {
+        notificationAudio.currentTime = 0;
+        notificationAudio.play().catch((error) => {
+            if (error?.name === 'NotAllowedError') {
+                isAudioUnlocked = false;
+                attachAudioUnlockListeners();
+            }
+        });
+    } catch (error) {
+        attachAudioUnlockListeners();
+    }
+};
 
 // Utility: flatten API response into single array
 const flattenMessages = (messageGroups = []) => {
@@ -114,7 +168,19 @@ const fetchMessages = async (customerId, { showLoading = true } = {}) => {
             const flatMessages = flattenMessages(response.data.messages);
 
             if (!areMessagesEqual(messages.value, flatMessages)) {
+                const previousLength = messages.value.length;
+                const nextLength = flatMessages.length;
+
                 messages.value = flatMessages;
+
+                // Only play sound on polling updates (not initial load) and when there's new incoming customer messages
+                if (!showLoading && nextLength > previousLength) {
+                    const newMessages = flatMessages.slice(previousLength);
+                    const hasIncoming = newMessages.some(m => m?.sender === 'customer' && m?.text);
+                    if (hasIncoming) {
+                        playNotificationSound();
+                    }
+                }
             }
         }
     } catch (error) {
@@ -186,6 +252,18 @@ const sendMessage = async (messageData) => {
 
 // Auto-select first conversation jika ada
 onMounted(() => {
+    // Prepare notification audio (file should be available at /notification_sound/apple-pay-sound.mp3)
+    try {
+        notificationAudio = new Audio('/notification_sound/apple-pay-sound.mp3');
+        notificationAudio.preload = 'auto';
+        notificationAudio.volume = 1.0;
+        isAudioUnlocked = false;
+    } catch (e) {
+        notificationAudio = null;
+    }
+
+    attachAudioUnlockListeners();
+
     if (props.conversations.length > 0) {
         selectConversation(props.conversations[0]);
     }
@@ -193,6 +271,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     stopPolling();
+    detachAudioUnlockListeners();
 });
 </script>
 
