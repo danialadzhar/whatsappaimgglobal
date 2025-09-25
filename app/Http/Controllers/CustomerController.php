@@ -158,14 +158,14 @@ class CustomerController extends Controller
             // Validate input data
             $request->validate([
                 'customer_messages' => 'required|string',
-                'ai_messages' => 'required|string',
+                'ai_messages' => 'nullable|string',
                 'customer_id' => 'required|integer|exists:customers,id',
             ]);
 
             // Create new message log
             $messageLog = MessageLog::create([
                 'customer_messages' => $request->customer_messages,
-                'ai_messages' => $request->ai_messages,
+                'ai_messages' => $request->ai_messages ?? '',
                 'customer_id' => $request->customer_id,
             ]);
 

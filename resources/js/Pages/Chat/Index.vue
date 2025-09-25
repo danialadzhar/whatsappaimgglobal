@@ -33,7 +33,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, onUnmounted } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import ChatSidebar from '@/Components/Chat/ChatSidebar.vue';
@@ -53,33 +53,108 @@ const selectedConversation = ref(null);
 const messages = ref([]);
 const searchQuery = ref('');
 const loading = ref(false);
+const POLLING_INTERVAL_MS = 2000;
+let pollingTimer = null;
 
-// Pilih conversation
-const selectConversation = async (conversation) => {
-    selectedConversation.value = conversation;
-    loading.value = true;
+// Utility: flatten API response into single array
+const flattenMessages = (messageGroups = []) => {
+    const flatMessages = [];
+
+    messageGroups
+        .filter(Boolean)
+        .forEach((msgGroup) => {
+            if (msgGroup.customer_message?.text) {
+                flatMessages.push(msgGroup.customer_message);
+            }
+            if (msgGroup.ai_message?.text) {
+                flatMessages.push(msgGroup.ai_message);
+            }
+        });
+
+    return flatMessages;
+};
+
+// Utility: check if two message arrays are equal
+const areMessagesEqual = (currentMessages, newMessages) => {
+    if (currentMessages.length !== newMessages.length) return false;
+
+    for (let index = 0; index < currentMessages.length; index += 1) {
+        const current = currentMessages[index];
+        const incoming = newMessages[index];
+
+        if (
+            current.id !== incoming.id ||
+            current.text !== incoming.text ||
+            current.sender !== incoming.sender
+        ) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
+// Fetch messages dari API
+const fetchMessages = async (customerId, { showLoading = true } = {}) => {
+    if (!customerId) return;
+
+    if (showLoading) {
+        loading.value = true;
+    }
 
     try {
-        const response = await axios.get(`/api/chat/messages/${conversation.id}`);
+        const response = await axios.get(`/api/chat/messages/${customerId}`);
+
+        // Jika user bertukar conversation semasa request, abaikan response
+        if (!selectedConversation.value || selectedConversation.value.id !== customerId) {
+            return;
+        }
+
         if (response.data.success) {
-            // Flatten messages untuk display (ambil yang wujud sahaja)
-            const flatMessages = [];
-            response.data.messages.forEach(msgGroup => {
-                if (msgGroup.customer_message?.text) {
-                    flatMessages.push(msgGroup.customer_message);
-                }
-                if (msgGroup.ai_message?.text) {
-                    flatMessages.push(msgGroup.ai_message);
-                }
-            });
-            messages.value = flatMessages;
+            const flatMessages = flattenMessages(response.data.messages);
+
+            if (!areMessagesEqual(messages.value, flatMessages)) {
+                messages.value = flatMessages;
+            }
         }
     } catch (error) {
         console.error('Error loading messages:', error);
-        messages.value = [];
+        if (showLoading) {
+            messages.value = [];
+        }
     } finally {
-        loading.value = false;
+        if (showLoading) {
+            loading.value = false;
+        }
     }
+};
+
+// Hentikan polling sedia ada
+const stopPolling = () => {
+    if (pollingTimer) {
+        clearInterval(pollingTimer);
+        pollingTimer = null;
+    }
+};
+
+// Mulakan polling
+const startPolling = (customerId) => {
+    stopPolling();
+
+    pollingTimer = setInterval(() => {
+        fetchMessages(customerId, { showLoading: false });
+    }, POLLING_INTERVAL_MS);
+};
+
+// Pilih conversation
+const selectConversation = async (conversation) => {
+    if (!conversation) return;
+
+    stopPolling();
+    selectedConversation.value = conversation;
+
+    await fetchMessages(conversation.id, { showLoading: true });
+    startPolling(conversation.id);
 };
 
 // Update search query
@@ -114,6 +189,10 @@ onMounted(() => {
     if (props.conversations.length > 0) {
         selectConversation(props.conversations[0]);
     }
+});
+
+onUnmounted(() => {
+    stopPolling();
 });
 </script>
 
