@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\MessageLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 
@@ -127,6 +129,21 @@ class ChatController extends Controller
 
         // Update customer timestamp
         $customer->touch();
+
+        if (!empty($messageLog->ai_messages)) {
+            try {
+                Http::post('https://automation.mgglobalhq.com/webhook-test/0a02dc45-b798-419e-b7f7-4090c26cb830', [
+                    'ai_messages' => $messageLog->ai_messages,
+                    'phone_number' => $customer->phone_number,
+                ]);
+            } catch (\Throwable $exception) {
+                Log::warning('Failed to send AI message webhook', [
+                    'message_log_id' => $messageLog->id,
+                    'customer_id' => $customer->id,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => true,
