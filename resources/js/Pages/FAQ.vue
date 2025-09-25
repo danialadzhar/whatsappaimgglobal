@@ -32,16 +32,20 @@ const pagination = ref({
 const showAddFAQModal = ref(false);
 const isSubmitting = ref(false);
 const countdownTimer = ref(0);
+const isPrinting = ref(false);
+const printError = ref(null);
 
 // Fetch FAQ data dari API
-const fetchFAQData = async (page = 1) => {
+const fetchFAQData = async (page = 1, fetchAll = false) => {
     try {
-        loading.value = true;
+        if (!fetchAll) {
+            loading.value = true;
+        }
 
         // Build query parameters
         const params = new URLSearchParams({
             page: page,
-            per_page: 10
+            per_page: fetchAll ? 1000 : 10
         });
 
         if (searchQuery.value) {
@@ -58,6 +62,10 @@ const fetchFAQData = async (page = 1) => {
         console.log('FAQ data result:', result); // Debug log
 
         if (result.success) {
+            if (fetchAll) {
+                return result.data;
+            }
+
             faqData.value = result.data;
             pagination.value = result.pagination;
             currentPage.value = result.pagination.current_page;
@@ -69,7 +77,9 @@ const fetchFAQData = async (page = 1) => {
         error.value = 'An error occurred while loading FAQ data';
         console.error('Error fetching FAQ data:', err);
     } finally {
-        loading.value = false;
+        if (!fetchAll) {
+            loading.value = false;
+        }
     }
 };
 
@@ -177,6 +187,93 @@ const handleBranchChange = (branch) => {
     fetchFAQData(1);
 };
 
+// Handle print FAQ data
+const handlePrintFAQ = async () => {
+    try {
+        isPrinting.value = true;
+        printError.value = null;
+
+        // Fetch all FAQ data without pagination limit
+        const allFaqData = await fetchFAQData(1, true);
+
+        if (!allFaqData || allFaqData.length === 0) {
+            alert('Tiada FAQ untuk dicetak');
+            return;
+        }
+
+        // Generate printable content
+        const printWindow = window.open('', '_blank');
+
+        if (!printWindow) {
+            alert('Tidak dapat membuka tetingkap cetak. Sila semak tetapan pop-up browser.');
+            return;
+        }
+
+        const printableContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>FAQ Print</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 40px;
+            color: #1f2937;
+        }
+        h1 {
+            text-align: center;
+            color: #111827;
+            margin-bottom: 30px;
+        }
+        .faq-item {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        .question {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .answer {
+            margin: 0;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <h1>FAQ List</h1>
+    ${allFaqData.map((faq, index) =>
+            `<div class="faq-item">
+            <div class="question">Question ${index + 1}: ${faq.question}</div>
+            <div class="answer">Answer: ${faq.answer}</div>
+        </div>`
+        ).join('')}
+</body>
+</html>
+        `;
+
+        printWindow.document.write(printableContent);
+        printWindow.document.close();
+        printWindow.focus();
+
+        // Wait for content to load before printing
+        printWindow.onload = () => {
+            printWindow.print();
+            printWindow.close();
+        };
+
+    } catch (err) {
+        console.error('Error printing FAQ:', err);
+        printError.value = 'Gagal mencetak FAQ. Sila cuba lagi nanti.';
+    } finally {
+        isPrinting.value = false;
+    }
+};
+
 // Load data saat component mounted
 onMounted(() => {
     console.log('Component mounted, fetching initial data'); // Debug log
@@ -205,7 +302,7 @@ onMounted(() => {
                 <!-- Search dan Filter Section -->
                 <FAQSearch :search-query="searchQuery" :selected-branch="selectedBranch" :branches="branches"
                     @update:search-query="handleSearchChange" @update:selected-branch="handleBranchChange"
-                    @add-faq="handleAddFAQ" />
+                    @add-faq="handleAddFAQ" @print-faq="handlePrintFAQ" />
 
                 <!-- Loading State -->
                 <div v-if="loading" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">

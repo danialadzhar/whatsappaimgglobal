@@ -18,8 +18,6 @@ class FAQController extends Controller
         return Inertia::render('FAQ');
     }
 
-
-
     /**
      * Store a newly created FAQ
      * Save new FAQ to database
