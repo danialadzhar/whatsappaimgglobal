@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\EcommerceController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,6 +43,12 @@ Route::middleware('auth')->group(function () {
 
     // Settings Routes
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+
+    // Product Management Routes
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 });
 
 // API Routes moved to routes/api.php for consistency
