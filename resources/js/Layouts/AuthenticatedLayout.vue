@@ -43,7 +43,7 @@ const navigationItems = ref([
     },
     {
         name: 'E-Commerce',
-        href: 'ecommerce.index',
+        href: 'products.index',
         icon: '🛒',
         active: false
     },
@@ -112,7 +112,7 @@ const supportItems = ref([
                         <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">General</p>
                         <nav class="mt-2 space-y-1">
                             <Link v-for="item in navigationItems" :key="item.name"
-                                :href="['dashboard', 'customers', 'faq', 'chat', 'settings', 'ecommerce.index'].includes(item.href) ? route(item.href) : item.href"
+                                :href="['dashboard', 'customers', 'faq', 'chat', 'settings', 'products.index'].includes(item.href) ? route(item.href) : item.href"
                                 :class="[
                                     item.active
                                         ? 'bg-blue-50 border-r-2 border-blue-600 text-blue-700'
@@ -223,7 +223,7 @@ const supportItems = ref([
                         <div class="flex items-center">
                             <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
                                 <span class="text-sm font-medium text-gray-700">{{ $page.props.auth.user.name.charAt(0)
-                                }}</span>
+                                    }}</span>
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm font-medium text-gray-700">{{ $page.props.auth.user.name }}</p>

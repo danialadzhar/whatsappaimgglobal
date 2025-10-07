@@ -42,7 +42,7 @@ const chatbotStats = computed(() => [
     {
         title: 'Response Rate',
         description: 'AI response in 1 minute',
-        count: props.stats.responseRate || 0,
+        count: parseFloat((props.stats.responseRate || 0).toFixed(2)),
         subtitle: 'Percentage of fast responses',
         icon: '⚡',
         iconBgClass: 'bg-green-100'
