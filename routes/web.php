@@ -5,6 +5,7 @@ use App\Http\Controllers\FAQController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\EcommerceController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,6 +20,10 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+
+// Ecommerce Routes (Public - boleh access tanpa login)
+Route::get('/ecommerce', [EcommerceController::class, 'index'])->name('ecommerce.index');
+Route::get('/ecommerce/{id}', [EcommerceController::class, 'show'])->name('ecommerce.show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
