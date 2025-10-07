@@ -117,9 +117,9 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">${{ product.price }}</div>
+                                        <div class="text-sm text-gray-900">RM{{ product.price }}</div>
                                         <div v-if="product.original_price" class="text-xs text-gray-500 line-through">
-                                            ${{ product.original_price }}</div>
+                                            RM{{ product.original_price }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span :class="product.stock > 10 ? 'text-green-600' : 'text-red-600'"
@@ -246,19 +246,30 @@
 
                                     <!-- Image Upload -->
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Product
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Product
                                             Image</label>
-                                        <input @change="handleImageUpload" type="file" accept="image/*" ref="imageInput"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
 
-                                        <!-- Image Preview -->
-                                        <div v-if="imagePreview" class="mt-3">
-                                            <img :src="imagePreview" alt="Preview"
-                                                class="w-32 h-32 object-cover rounded-lg border" />
+                                        <!-- Dropzone Container -->
+                                        <div ref="dropzoneElement"
+                                            class="dropzone border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors">
+                                            <div class="dz-message" data-dz-message>
+                                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor"
+                                                    fill="none" viewBox="0 0 48 48">
+                                                    <path
+                                                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                        stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                                <p class="mt-2 text-sm text-gray-600">
+                                                    <span class="font-semibold">Click to upload</span> or drag and drop
+                                                </p>
+                                                <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                            </div>
                                         </div>
 
                                         <!-- Current Image (for edit mode) -->
-                                        <div v-else-if="form.image_url" class="mt-3">
+                                        <div v-if="!imagePreview && form.image_url" class="mt-3">
+                                            <p class="text-sm text-gray-600 mb-2">Current Image:</p>
                                             <img :src="form.image_url" alt="Current"
                                                 class="w-32 h-32 object-cover rounded-lg border" />
                                         </div>
@@ -295,10 +306,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import axios from 'axios';
+import { Dropzone } from 'dropzone';
+import 'dropzone/dist/dropzone.css';
 
 const props = defineProps({
     products: {
@@ -328,6 +341,8 @@ const showEditModal = ref(false);
 const editingProduct = ref(null);
 const imagePreview = ref(null);
 const imageFile = ref(null);
+const dropzoneElement = ref(null);
+const dropzoneInstance = ref(null);
 
 // Form data
 const form = ref({
@@ -386,16 +401,50 @@ const filteredProducts = computed(() => {
 });
 
 // Methods
-const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        imageFile.value = file;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            imagePreview.value = e.target.result;
-        };
-        reader.readAsDataURL(file);
+const initializeDropzone = () => {
+    if (!dropzoneElement.value) return;
+
+    // Destroy existing instance if any
+    if (dropzoneInstance.value) {
+        dropzoneInstance.value.destroy();
+        dropzoneInstance.value = null;
     }
+
+    // Initialize new Dropzone instance
+    dropzoneInstance.value = new Dropzone(dropzoneElement.value, {
+        url: '/fake-url', // We handle upload manually, so this is just a placeholder
+        autoProcessQueue: false, // Don't auto-upload
+        maxFiles: 1,
+        maxFilesize: 10, // MB
+        acceptedFiles: 'image/*',
+        addRemoveLinks: true,
+        dictDefaultMessage: '',
+        thumbnailWidth: 200,
+        thumbnailHeight: 200,
+        init: function () {
+            this.on('addedfile', function (file) {
+                // Remove previous file if exists
+                if (this.files.length > 1) {
+                    this.removeFile(this.files[0]);
+                }
+
+                // Store the file
+                imageFile.value = file;
+
+                // Create preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.value = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            this.on('removedfile', function () {
+                imageFile.value = null;
+                imagePreview.value = null;
+            });
+        }
+    });
 };
 
 const editProduct = (product) => {
@@ -465,6 +514,12 @@ const submitProduct = async () => {
 };
 
 const closeModal = () => {
+    // Destroy Dropzone instance
+    if (dropzoneInstance.value) {
+        dropzoneInstance.value.destroy();
+        dropzoneInstance.value = null;
+    }
+
     showCreateModal.value = false;
     showEditModal.value = false;
     editingProduct.value = null;
@@ -481,4 +536,69 @@ const closeModal = () => {
         is_active: true
     };
 };
+
+// Watch for modal open to initialize Dropzone
+watch([showCreateModal, showEditModal], async ([create, edit]) => {
+    if (create || edit) {
+        await nextTick();
+        initializeDropzone();
+    }
+});
 </script>
+
+<style scoped>
+/* Custom Dropzone Styling */
+:deep(.dropzone) {
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fafafa;
+}
+
+:deep(.dropzone .dz-message) {
+    margin: 0;
+}
+
+:deep(.dropzone .dz-preview) {
+    margin: 10px;
+}
+
+:deep(.dropzone .dz-preview .dz-image) {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+:deep(.dropzone .dz-preview .dz-image img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+:deep(.dropzone .dz-preview .dz-error-message) {
+    top: 130px;
+    left: -10px;
+    width: 220px;
+    background: #ef4444;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+:deep(.dropzone .dz-preview .dz-remove) {
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 8px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+:deep(.dropzone .dz-preview .dz-remove:hover) {
+    text-decoration: underline;
+}
+
+:deep(.dropzone.dz-drag-hover) {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+</style>
