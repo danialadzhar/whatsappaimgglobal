@@ -14,7 +14,9 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::query();
+        $showArchived = $request->boolean('show_archived', false);
+
+        $query = $showArchived ? Product::onlyTrashed() : Product::query();
 
         // Apply search filter
         if ($request->filled('search')) {
@@ -50,7 +52,8 @@ class ProductController extends Controller
 
         return Inertia::render('Products/Index', [
             'products' => $products,
-            'filters' => $request->only(['search', 'category', 'sort_by']),
+            'filters' => $request->only(['search', 'category', 'sort_by', 'show_archived']),
+            'showArchived' => $showArchived,
         ]);
     }
 
@@ -149,19 +152,51 @@ class ProductController extends Controller
     }
 
     /**
-     * Delete product
+     * Soft delete product (archive)
      */
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
+
+        // Soft delete the product (archive it)
+        $product->delete();
+
+        return redirect()->route('products.index')->with('success', 'Product archived successfully');
+    }
+
+    /**
+     * Restore archived product
+     */
+    public function restore($id)
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+        $product->restore();
+
+        return redirect()->route('products.index')->with('success', 'Product restored successfully');
+    }
+
+    /**
+     * Force delete product (permanent delete)
+     */
+    public function forceDelete($id)
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+
+        // Check if product has orders
+        $hasOrders = \App\Models\OrderItem::where('product_id', $id)->exists();
+
+        if ($hasOrders) {
+            return redirect()->route('products.index')
+                ->with('error', 'Cannot permanently delete product. Product has existing orders. Consider archiving instead.');
+        }
 
         // Delete image file if exists
         if ($product->image && Storage::disk('public')->exists($product->image)) {
             Storage::disk('public')->delete($product->image);
         }
 
-        $product->delete();
+        $product->forceDelete();
 
-        return redirect()->route('products.index')->with('success', 'Product deleted successfully');
+        return redirect()->route('products.index')->with('success', 'Product permanently deleted');
     }
 }

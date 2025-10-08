@@ -34,14 +34,8 @@ const showUserDropdown = ref(false);
                     <div class="hidden md:flex items-center gap-6">
                         <Link :href="route('ecommerce.index')"
                             class="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                        Products
+                        Repairs Appointment
                         </Link>
-                        <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                            Categories
-                        </a>
-                        <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                            Deals
-                        </a>
                     </div>
 
                     <!-- Spacer untuk push right side ke kanan -->
@@ -76,14 +70,8 @@ const showUserDropdown = ref(false);
                 <div v-show="showMobileMenu" class="md:hidden border-t border-gray-200 py-4">
                     <Link :href="route('ecommerce.index')"
                         class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-                    Products
+                    Repairs Appointment
                     </Link>
-                    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        Categories
-                    </a>
-                    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-                        Deals
-                    </a>
                 </div>
             </div>
         </nav>
@@ -98,15 +86,13 @@ const showUserDropdown = ref(false);
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div>
-                        <h3 class="font-bold text-gray-900 mb-4">E-Shop</h3>
+                        <h3 class="font-bold text-gray-900 mb-4">MG Global HQ</h3>
                         <p class="text-sm text-gray-600">Your trusted online store for quality products.</p>
                     </div>
                     <div>
                         <h4 class="font-semibold text-gray-900 mb-4">Shop</h4>
                         <ul class="space-y-2 text-sm text-gray-600">
-                            <li><a href="#" class="hover:text-blue-600">Products</a></li>
-                            <li><a href="#" class="hover:text-blue-600">Categories</a></li>
-                            <li><a href="#" class="hover:text-blue-600">Deals</a></li>
+                            <li><a href="#" class="hover:text-blue-600">Repairs Appointment</a></li>
                         </ul>
                     </div>
                     <div>
@@ -127,7 +113,7 @@ const showUserDropdown = ref(false);
                     </div>
                 </div>
                 <div class="border-t border-gray-200 mt-8 pt-8 text-center text-sm text-gray-600">
-                    <p>&copy; {{ new Date().getFullYear() }} E-Shop. All rights reserved.</p>
+                    <p>&copy; {{ new Date().getFullYear() }} MG Global HQ. All rights reserved.</p>
                 </div>
             </div>
         </footer>

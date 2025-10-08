@@ -12,14 +12,31 @@
                             <h1 class="text-2xl font-semibold text-gray-900">Product Management</h1>
                             <p class="mt-1 text-sm text-gray-500">Manage your product catalog</p>
                         </div>
-                        <button @click="showCreateModal = true"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-150">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
-                            </svg>
-                            Add Product
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <!-- Toggle Archived Products -->
+                            <button @click="toggleArchived" :class="[
+                                'inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-150',
+                                showArchived
+                                    ? 'bg-gray-600 hover:bg-gray-700 text-white'
+                                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                            ]">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 8l6 6 6-6" />
+                                </svg>
+                                {{ showArchived ? 'Show Active' : 'Show Archived' }}
+                            </button>
+
+                            <!-- Add Product Button -->
+                            <button @click="showCreateModal = true" v-if="!showArchived"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-150">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add Product
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -136,26 +153,52 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex justify-end gap-2">
-                                            <button type="button" @click="editProduct(product)"
-                                                class="text-blue-600 hover:text-blue-900 transition-colors"
-                                                title="Edit">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
-                                            </button>
-                                            <button type="button" @click="deleteProduct(product.id)"
-                                                class="text-red-600 hover:text-red-900 transition-colors" title="Delete"
-                                                @click.stop>
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
+                                            <!-- Active Products Actions -->
+                                            <template v-if="!showArchived">
+                                                <button type="button" @click="editProduct(product)"
+                                                    class="text-blue-600 hover:text-blue-900 transition-colors"
+                                                    title="Edit">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                </button>
+                                                <button type="button" @click="archiveProduct(product.id)"
+                                                    class="text-orange-600 hover:text-orange-900 transition-colors"
+                                                    title="Archive" @click.stop>
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M5 8l6 6 6-6" />
+                                                    </svg>
+                                                </button>
+                                            </template>
+
+                                            <!-- Archived Products Actions -->
+                                            <template v-else>
+                                                <button type="button" @click="restoreProduct(product.id)"
+                                                    class="text-green-600 hover:text-green-900 transition-colors"
+                                                    title="Restore" @click.stop>
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    </svg>
+                                                </button>
+                                                <button type="button" @click="forceDeleteProduct(product.id)"
+                                                    class="text-red-600 hover:text-red-900 transition-colors"
+                                                    title="Permanently Delete" @click.stop>
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </template>
                                         </div>
                                     </td>
                                 </tr>
@@ -327,8 +370,13 @@ const props = defineProps({
         default: () => ({
             search: '',
             category: '',
-            sort_by: 'name'
+            sort_by: 'name',
+            show_archived: false
         })
+    },
+    showArchived: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -336,6 +384,7 @@ const props = defineProps({
 const searchQuery = ref(props.filters?.search || '');
 const selectedCategory = ref(props.filters?.category || '');
 const sortBy = ref(props.filters?.sort_by || 'name');
+const showArchived = ref(props.showArchived || false);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const editingProduct = ref(null);
@@ -467,6 +516,56 @@ const deleteProduct = (id) => {
         preserveScroll: true,
         onError: () => {
             alert('Failed to delete product. Please try again.');
+        }
+    });
+};
+
+const toggleArchived = () => {
+    showArchived.value = !showArchived.value;
+    router.get(route('products.index'), {
+        ...props.filters,
+        show_archived: showArchived.value
+    }, {
+        preserveState: true,
+        preserveScroll: true
+    });
+};
+
+const archiveProduct = (id) => {
+    if (!confirm('Are you sure you want to archive this product?')) {
+        return;
+    }
+
+    router.delete(route('products.destroy', id), {
+        preserveScroll: true,
+        onError: () => {
+            alert('Failed to archive product. Please try again.');
+        }
+    });
+};
+
+const restoreProduct = (id) => {
+    if (!confirm('Are you sure you want to restore this product?')) {
+        return;
+    }
+
+    router.post(route('products.restore', id), {}, {
+        preserveScroll: true,
+        onError: () => {
+            alert('Failed to restore product. Please try again.');
+        }
+    });
+};
+
+const forceDeleteProduct = (id) => {
+    if (!confirm('Are you sure you want to permanently delete this product? This action cannot be undone!')) {
+        return;
+    }
+
+    router.delete(route('products.forceDelete', id), {
+        preserveScroll: true,
+        onError: () => {
+            alert('Failed to permanently delete product. Please try again.');
         }
     });
 };
