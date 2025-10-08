@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,113 +13,62 @@ class EcommerceController extends Controller
      */
     public function index(Request $request)
     {
-        // Sample data produk - nanti boleh ganti dengan data dari database
-        $products = [
-            [
-                'id' => 1,
-                'name' => 'Wireless Earbuds, IPX8',
-                'description' => 'Organic Cotton, fairtrade certified',
-                'price' => 60,
-                'original_price' => null,
-                'image' => 'https://placehold.co/300x300',
-                'rating' => 4.5,
-                'reviews' => 738,
-                'category' => 'Earbuds',
-                'colors' => ['black', 'blue'],
-                'is_new' => false,
-            ],
-            [
-                'id' => 2,
-                'name' => 'AirPods Max',
-                'description' => 'A perfect balance of high-fidelity audio',
-                'price' => 2535,
-                'original_price' => 2999,
-                'image' => 'https://placehold.co/300x300',
-                'rating' => 4.8,
-                'reviews' => 121,
-                'category' => 'Headphones',
-                'colors' => ['silver', 'pink'],
-                'is_new' => false,
-            ],
-            [
-                'id' => 3,
-                'name' => 'Bose BT Earphones',
-                'description' => 'Table with air purifier, stained veneer/black',
-                'price' => 2535,
-                'original_price' => null,
-                'image' => 'https://placehold.co/300x300',
-                'rating' => 4.7,
-                'reviews' => 801,
-                'category' => 'Earphones',
-                'colors' => ['black'],
-                'is_new' => false,
-            ],
-            [
-                'id' => 4,
-                'name' => 'UNEYFOX Headphones',
-                'description' => 'Wired folded headphones with mic',
-                'price' => 135,
-                'original_price' => null,
-                'image' => 'https://placehold.co/300x300',
-                'rating' => 4.2,
-                'reviews' => 94,
-                'category' => 'Headphones',
-                'colors' => ['red'],
-                'is_new' => false,
-            ],
-            [
-                'id' => 5,
-                'name' => 'JBL TUNE 500BT/NC',
-                'description' => 'On-Ear Wireless Headphones with Purebass Sound',
-                'price' => 49,
-                'original_price' => null,
-                'image' => 'https://placehold.co/300x300',
-                'rating' => 4.6,
-                'reviews' => 556,
-                'category' => 'Headphones',
-                'colors' => ['black'],
-                'is_new' => false,
-            ],
-            [
-                'id' => 6,
-                'name' => 'TAOTV Bluetooth',
-                'description' => 'TAOTV M41 IPX7 Waterproof Earbuds',
-                'price' => 109,
-                'original_price' => null,
-                'image' => 'https://placehold.co/300x300',
-                'rating' => 4.3,
-                'reviews' => 243,
-                'category' => 'Earbuds',
-                'colors' => ['black', 'blue', 'cyan'],
-                'is_new' => false,
-            ],
-            [
-                'id' => 7,
-                'name' => 'Monster MNPLEX',
-                'description' => 'Monster MNPLEX Wireless Earphones',
-                'price' => 69,
-                'original_price' => null,
-                'image' => 'https://placehold.co/300x300',
-                'rating' => 4.4,
-                'reviews' => 187,
-                'category' => 'Earphones',
-                'colors' => ['black'],
-                'is_new' => false,
-            ],
-            [
-                'id' => 8,
-                'name' => 'Mpow CH6',
-                'description' => 'Kids Headphones with Microphone',
-                'price' => 660,
-                'original_price' => null,
-                'image' => 'https://placehold.co/300x300',
-                'rating' => 4.9,
-                'reviews' => 892,
-                'category' => 'Headphones',
-                'colors' => ['blue'],
-                'is_new' => false,
-            ],
-        ];
+        $query = Product::query()->active();
+
+        if ($request->filled('search')) {
+            $query->search($request->input('search'));
+        }
+
+        if ($request->filled('category') && $request->input('category') !== 'all') {
+            $query->category($request->input('category'));
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->input('min_price'));
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->input('max_price'));
+        }
+
+        switch ($request->input('sort_by')) {
+            case 'price-low':
+                $query->orderBy('price');
+                break;
+            case 'price-high':
+                $query->orderByDesc('price');
+                break;
+            case 'rating':
+                $query->orderByDesc('rating');
+                break;
+            case 'newest':
+                $query->latest();
+                break;
+            default:
+                $query->orderBy('name');
+        }
+
+        $products = $query->get()->map(function (Product $product) {
+            $isNew = $product->created_at ? $product->created_at->greaterThanOrEqualTo(now()->subDays(30)) : false;
+
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'description' => $product->description,
+                'price' => (float) $product->price,
+                'original_price' => $product->original_price ? (float) $product->original_price : null,
+                'image' => $product->image_url ?? 'https://placehold.co/300x300',
+                'rating' => (float) $product->rating,
+                'reviews' => (int) $product->reviews,
+                'category' => $product->category,
+                'colors' => $product->colors ?? [],
+                'is_new' => $isNew,
+                'stock' => (int) $product->stock,
+                'brand' => $product->brand,
+                'sku' => $product->sku,
+                'is_active' => (bool) $product->is_active,
+            ];
+        })->values();
 
         // Filter berdasarkan parameter request
         $filters = [
@@ -140,22 +90,29 @@ class EcommerceController extends Controller
      */
     public function show($id)
     {
-        // Sample data - nanti boleh ganti dengan data dari database
-        $product = [
-            'id' => $id,
-            'name' => 'Wireless Earbuds, IPX8',
-            'description' => 'Organic Cotton, fairtrade certified',
-            'price' => 60,
-            'original_price' => null,
-            'image' => 'https://placehold.co/300x300',
-            'rating' => 4.5,
-            'reviews' => 738,
-            'category' => 'Earbuds',
-            'colors' => ['black', 'blue'],
+        $product = Product::findOrFail($id);
+
+        $productData = [
+            'id' => $product->id,
+            'name' => $product->name,
+            'description' => $product->description,
+            'price' => (float) $product->price,
+            'original_price' => $product->original_price ? (float) $product->original_price : null,
+            'image' => $product->image_url ?? 'https://placehold.co/300x300',
+            'rating' => (float) $product->rating,
+            'reviews' => (int) $product->reviews,
+            'category' => $product->category,
+            'colors' => $product->colors ?? [],
+            'stock' => (int) $product->stock,
+            'brand' => $product->brand,
+            'sku' => $product->sku,
+            'is_active' => (bool) $product->is_active,
+            'specifications' => $product->specifications ?? [],
+            'tags' => $product->tags,
         ];
 
         return Inertia::render('Ecommerce/Show', [
-            'product' => $product,
+            'product' => $productData,
         ]);
     }
 }

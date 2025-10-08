@@ -25,7 +25,7 @@ const addToCart = () => {
 
 // Format harga
 const formatPrice = (price) => {
-    return `$${price.toFixed(2)}`;
+    return `RM${price.toFixed(2)}`;
 };
 
 // Generate rating stars

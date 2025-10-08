@@ -26,10 +26,10 @@ const categories = [
 // Price ranges
 const priceRanges = [
     { value: 'all', label: 'All Prices' },
-    { value: '0-100', label: 'Under $100' },
-    { value: '100-500', label: '$100 - $500' },
-    { value: '500-1000', label: '$500 - $1000' },
-    { value: '1000+', label: 'Above $1000' },
+    { value: '0-100', label: 'Under RM100' },
+    { value: '100-500', label: 'RM100 - RM500' },
+    { value: '500-1000', label: 'RM500 - RM1000' },
+    { value: '1000+', label: 'Above RM1000' },
 ];
 
 // Sort options
