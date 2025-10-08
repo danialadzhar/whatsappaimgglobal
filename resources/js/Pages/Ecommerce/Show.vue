@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import EcommerceLayout from '@/Layouts/EcommerceLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 
 const props = defineProps({
     product: {
@@ -14,12 +14,19 @@ const selectedColor = ref(props.product.colors?.[0] || 'black');
 const quantity = ref(1);
 const isAdding = ref(false);
 
-// Fungsi untuk add to cart
+// Fungsi untuk add to cart dan redirect ke checkout
 const addToCart = () => {
     isAdding.value = true;
     setTimeout(() => {
         isAdding.value = false;
-        alert(`${quantity.value}x ${props.product.name} ditambah ke cart!`);
+        // Redirect ke checkout page dengan product data
+        router.visit(`/ecommerce/checkout/${props.product.id}`, {
+            method: 'get',
+            data: {
+                quantity: quantity.value,
+                color: selectedColor.value
+            }
+        });
     }, 500);
 };
 

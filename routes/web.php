@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\EcommerceController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,12 @@ Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'inde
 // Ecommerce Routes (Public - boleh access tanpa login)
 Route::get('/ecommerce', [EcommerceController::class, 'index'])->name('ecommerce.index');
 Route::get('/ecommerce/{id}', [EcommerceController::class, 'show'])->name('ecommerce.show');
+Route::get('/ecommerce/checkout/{id}', [EcommerceController::class, 'checkout'])->name('ecommerce.checkout');
+
+// Order Routes (Public)
+Route::post('/ecommerce/order', [OrderController::class, 'store'])->name('ecommerce.order.store');
+Route::get('/ecommerce/order/success/{id}', [OrderController::class, 'success'])->name('ecommerce.order.success');
+Route::get('/ecommerce/order/{orderNumber}', [OrderController::class, 'show'])->name('ecommerce.order.show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -49,6 +56,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+    // Order Management Routes (Admin)
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [OrderController::class, 'detail'])->name('orders.detail');
+    Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 });
 
 // API Routes moved to routes/api.php for consistency

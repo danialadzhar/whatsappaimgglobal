@@ -115,4 +115,34 @@ class EcommerceController extends Controller
             'product' => $productData,
         ]);
     }
+
+    /**
+     * Paparkan halaman checkout
+     */
+    public function checkout(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+
+        $productData = [
+            'id' => $product->id,
+            'name' => $product->name,
+            'description' => $product->description,
+            'price' => (float) $product->price,
+            'original_price' => $product->original_price ? (float) $product->original_price : null,
+            'image' => $product->image_url ?? 'https://placehold.co/300x300',
+            'rating' => (float) $product->rating,
+            'reviews' => (int) $product->reviews,
+            'category' => $product->category,
+            'colors' => $product->colors ?? [],
+            'stock' => (int) $product->stock,
+            'brand' => $product->brand,
+            'sku' => $product->sku,
+        ];
+
+        return Inertia::render('Ecommerce/Checkout', [
+            'product' => $productData,
+            'quantity' => (int) $request->input('quantity', 1),
+            'color' => $request->input('color'),
+        ]);
+    }
 }
