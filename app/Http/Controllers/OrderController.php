@@ -8,6 +8,7 @@ use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 
 class OrderController extends Controller
@@ -126,13 +127,54 @@ class OrderController extends Controller
             }),
         ];
 
+        // Generate signed tracking URL
+        $trackingUrl = URL::temporarySignedRoute(
+            'ecommerce.order.show',
+            now()->addMinutes(30),
+            ['orderNumber' => $order->order_number]
+        );
+
         return Inertia::render('Ecommerce/OrderSuccess', [
             'order' => $orderData,
+            'trackingUrl' => $trackingUrl,
         ]);
     }
 
     /**
-     * Show order tracking page
+     * Show order tracking form
+     */
+    public function trackForm()
+    {
+        return Inertia::render('Ecommerce/OrderTrackingForm');
+    }
+
+    /**
+     * Submit order tracking form and redirect to signed URL
+     */
+    public function trackSubmit(Request $request)
+    {
+        $data = $request->validate([
+            'order_number' => 'required|string',
+            'customer_email' => 'required|email',
+        ]);
+
+        // Find order by both order number and email for security
+        $order = Order::where('order_number', $data['order_number'])
+            ->where('customer_email', $data['customer_email'])
+            ->firstOrFail();
+
+        // Generate temporary signed URL (valid for 30 minutes)
+        $url = URL::temporarySignedRoute(
+            'ecommerce.order.show',
+            now()->addMinutes(30),
+            ['orderNumber' => $order->order_number]
+        );
+
+        return redirect($url);
+    }
+
+    /**
+     * Show order tracking page (requires signed URL)
      */
     public function show($orderNumber)
     {

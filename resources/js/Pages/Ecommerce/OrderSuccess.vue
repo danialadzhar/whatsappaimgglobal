@@ -7,6 +7,10 @@ const props = defineProps({
     order: {
         type: Object,
         required: true
+    },
+    trackingUrl: {
+        type: String,
+        required: true
     }
 });
 
@@ -63,8 +67,8 @@ const statusDisplay = getStatusDisplay(props.order.status);
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Order Berjaya!</h1>
-                    <p class="text-gray-600">Terima kasih atas pembelian anda. Order anda telah diterima.</p>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Order Success!</h1>
+                    <p class="text-gray-600">Thank you for your purchase. Your order has been received.</p>
                 </div>
 
                 <!-- Order Summary Card -->
@@ -205,10 +209,10 @@ const statusDisplay = getStatusDisplay(props.order.status);
 
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link :href="route('ecommerce.order.show', order.order_number)"
+                    <a :href="trackingUrl"
                         class="px-8 py-3 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors duration-200 text-center">
-                    Track Order
-                    </Link>
+                        Track Order
+                    </a>
 
                     <Link :href="route('ecommerce.index')"
                         class="px-8 py-3 border-2 border-gray-900 text-gray-900 font-semibold rounded-xl hover:bg-gray-50 transition-colors duration-200 text-center">
@@ -219,10 +223,17 @@ const statusDisplay = getStatusDisplay(props.order.status);
                 <!-- Additional Info -->
                 <div class="mt-8 text-center">
                     <p class="text-sm text-gray-600">
-                        Kami akan menghantar email pengesahan kepada {{ order.customer_email }} dalam masa terdekat.
+                        We will send a confirmation email to {{ order.customer_email }} in the near future.
                     </p>
                     <p class="text-sm text-gray-500 mt-2">
-                        Jika anda mempunyai sebarang pertanyaan, sila hubungi kami.
+                        If you have any questions, please contact us.
+                    </p>
+                    <p class="text-sm text-gray-500 mt-3">
+                        Track your order anytime:
+                        <Link :href="route('ecommerce.order.track.form')"
+                            class="text-blue-600 hover:text-blue-700 font-medium underline">
+                        Order Tracking Page
+                        </Link>
                     </p>
                 </div>
             </div>
