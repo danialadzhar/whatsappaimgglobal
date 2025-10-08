@@ -19,7 +19,7 @@ class Product extends Model
     protected $fillable = [
         'name',
         'description',
-        'category',
+        'category_id',
         'price',
         'original_price',
         'image',
@@ -59,9 +59,17 @@ class Product extends Model
     /**
      * Scope a query to filter by category.
      */
-    public function scopeCategory($query, $category)
+    public function scopeCategory($query, $categoryId)
     {
-        return $query->where('category', $category);
+        return $query->where('category_id', $categoryId);
+    }
+
+    /**
+     * Get the category that owns the product.
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 
     /**

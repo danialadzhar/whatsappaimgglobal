@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -42,7 +43,7 @@ class ProductController extends Controller
                 break;
         }
 
-        $products = $query->paginate(10);
+        $products = $query->with('category')->paginate(10);
 
         // Add image_url to each product
         $products->getCollection()->transform(function ($product) {
@@ -50,8 +51,12 @@ class ProductController extends Controller
             return $product;
         });
 
+        // Get all categories for the dropdown
+        $categories = Category::orderBy('name')->get();
+
         return Inertia::render('Products/Index', [
             'products' => $products,
+            'categories' => $categories,
             'filters' => $request->only(['search', 'category', 'sort_by', 'show_archived']),
             'showArchived' => $showArchived,
         ]);
@@ -66,7 +71,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
@@ -114,7 +119,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',

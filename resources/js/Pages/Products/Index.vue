@@ -63,9 +63,9 @@
                         <select v-model="selectedCategory"
                             class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             <option value="">All Categories</option>
-                            <option value="Headphones">Headphones</option>
-                            <option value="Earbuds">Earbuds</option>
-                            <option value="Earphones">Earphones</option>
+                            <option v-for="category in categories" :key="category.id" :value="category.id">
+                                {{ category.name }}
+                            </option>
                         </select>
 
                         <!-- Sort -->
@@ -130,7 +130,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
                                             class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            {{ product.category }}
+                                            {{ product.category?.name || 'No Category' }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -263,13 +263,19 @@
                                     <!-- Category -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                                        <select v-model="form.category" required
+                                        <select v-model="form.category_id" required
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                             <option value="">Select Category</option>
-                                            <option value="Headphones">Headphones</option>
-                                            <option value="Earbuds">Earbuds</option>
-                                            <option value="Earphones">Earphones</option>
+                                            <option v-for="category in categories" :key="category.id"
+                                                :value="category.id">
+                                                {{ category.name }}
+                                            </option>
                                         </select>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            or <button type="button" @click="showCategoryModal = true"
+                                                class="text-blue-600 underline hover:text-blue-800">Add new Category
+                                                here</button>
+                                        </p>
                                     </div>
 
                                     <!-- Price and Stock -->
@@ -344,6 +350,61 @@
                     </div>
                 </div>
             </Teleport>
+
+            <!-- Category Modal -->
+            <Teleport to="body">
+                <div v-if="showCategoryModal" class="fixed inset-0 z-50 overflow-y-auto"
+                    aria-labelledby="category-modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <!-- Background overlay -->
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                            @click="closeCategoryModal">
+                        </div>
+
+                        <!-- Modal panel -->
+                        <div
+                            class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-medium text-gray-900" id="category-modal-title">
+                                        Add New Category
+                                    </h3>
+                                    <button @click="closeCategoryModal" class="text-gray-400 hover:text-gray-500">
+                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <form @submit.prevent="submitCategory" class="space-y-4">
+                                    <!-- Category Name -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Category
+                                            Name</label>
+                                        <input v-model="categoryForm.name"
+                                            @input="categoryForm.name = categoryForm.name.toUpperCase()"
+                                            placeholder="Enter Category Name" type="text" required
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase" />
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="flex justify-end gap-3 pt-4">
+                                        <button type="button" @click="closeCategoryModal"
+                                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                            Cancel
+                                        </button>
+                                        <button type="submit"
+                                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                                            Add Category
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Teleport>
         </div>
     </AuthenticatedLayout>
 </template>
@@ -364,6 +425,10 @@ const props = defineProps({
             links: {},
             meta: {}
         })
+    },
+    categories: {
+        type: Array,
+        default: () => []
     },
     filters: {
         type: Object,
@@ -387,17 +452,20 @@ const sortBy = ref(props.filters?.sort_by || 'name');
 const showArchived = ref(props.showArchived || false);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
+const showCategoryModal = ref(false);
 const editingProduct = ref(null);
 const imagePreview = ref(null);
 const imageFile = ref(null);
 const dropzoneElement = ref(null);
 const dropzoneInstance = ref(null);
+const categories = ref(props.categories || []);
+const categoryForm = ref({ name: '' });
 
 // Form data
 const form = ref({
     name: '',
     description: '',
-    category: '',
+    category_id: '',
     price: 0,
     stock: 0,
     image: null,
@@ -431,7 +499,7 @@ const filteredProducts = computed(() => {
 
     // Category
     if (selectedCategory.value) {
-        filtered = filtered.filter(p => p.category === selectedCategory.value);
+        filtered = filtered.filter(p => p.category_id == selectedCategory.value);
     }
 
     // Sort
@@ -576,7 +644,7 @@ const submitProduct = async () => {
     // Add form fields
     formData.append('name', form.value.name);
     formData.append('description', form.value.description || '');
-    formData.append('category', form.value.category);
+    formData.append('category_id', form.value.category_id);
     formData.append('price', form.value.price);
     formData.append('stock', form.value.stock);
     formData.append('is_active', form.value.is_active ? 1 : 0);
@@ -627,13 +695,50 @@ const closeModal = () => {
     form.value = {
         name: '',
         description: '',
-        category: '',
+        category_id: '',
         price: 0,
         stock: 0,
         image: null,
         image_url: null,
         is_active: true
     };
+};
+
+// Category methods
+const fetchCategories = async () => {
+    try {
+        const response = await axios.get('/categories');
+        categories.value = response.data;
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+    }
+};
+
+const submitCategory = async () => {
+    try {
+        const response = await axios.post('/categories', {
+            name: categoryForm.value.name
+        });
+
+        if (response.data.success) {
+            // Add the new category to the list
+            categories.value.push(response.data.category);
+
+            // Select the new category in the form
+            form.value.category_id = response.data.category.id;
+
+            // Close the modal
+            closeCategoryModal();
+        }
+    } catch (error) {
+        console.error('Error creating category:', error);
+        alert('Error creating category. Please try again.');
+    }
+};
+
+const closeCategoryModal = () => {
+    showCategoryModal.value = false;
+    categoryForm.value = { name: '' };
 };
 
 // Watch for modal open to initialize Dropzone
