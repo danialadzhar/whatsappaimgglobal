@@ -14,6 +14,115 @@ use Inertia\Inertia;
 class OrderController extends Controller
 {
     /**
+     * API endpoint untuk membuat order baru
+     */
+    public function apiStore(Request $request)
+    {
+        // Validate request data
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:20',
+            'customer_email' => 'required|email|max:255',
+            'delivery_method' => 'required|in:cod,postage,walkin',
+            'payment_method' => 'required|in:full,booking,walkin',
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+            'color' => 'nullable|string|max:50',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Get product dan validate stock
+            $product = Product::findOrFail($validated['product_id']);
+
+            if ($product->stock < $validated['quantity']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Stok tidak mencukupi. Stok tersedia: ' . $product->stock,
+                    'errors' => [
+                        'quantity' => 'Stok tidak mencukupi. Stok tersedia: ' . $product->stock
+                    ]
+                ], 400);
+            }
+
+            // Calculate pricing
+            $subtotal = $product->price * $validated['quantity'];
+
+            // Calculate discounts based on delivery and payment methods
+            $deliveryDiscount = $this->calculateDeliveryDiscount($validated['delivery_method'], $subtotal);
+            $paymentDiscount = $this->calculatePaymentDiscount($validated['payment_method'], $subtotal);
+            $totalAmount = $subtotal - $deliveryDiscount - $paymentDiscount;
+
+            // Create order
+            $order = Order::create([
+                'order_number' => Order::generateOrderNumber(),
+                'customer_name' => $validated['customer_name'],
+                'customer_phone' => $validated['customer_phone'],
+                'customer_email' => $validated['customer_email'],
+                'delivery_method' => $validated['delivery_method'],
+                'payment_method' => $validated['payment_method'],
+                'subtotal' => $subtotal,
+                'delivery_discount' => $deliveryDiscount,
+                'payment_discount' => $paymentDiscount,
+                'total_amount' => $totalAmount,
+                'status' => 'pending',
+            ]);
+
+            // Create order item
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'product_price' => $product->price,
+                'quantity' => $validated['quantity'],
+                'color' => $validated['color'],
+                'subtotal' => $subtotal,
+            ]);
+
+            // Deduct stock
+            $product->decrement('stock', $validated['quantity']);
+
+            DB::commit();
+
+            // Prepare order data for response
+            $orderData = [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'customer_name' => $order->customer_name,
+                'customer_phone' => $order->customer_phone,
+                'customer_email' => $order->customer_email,
+                'delivery_method' => $order->delivery_method,
+                'payment_method' => $order->payment_method,
+                'subtotal' => (float) $order->subtotal,
+                'delivery_discount' => (float) $order->delivery_discount,
+                'payment_discount' => (float) $order->payment_discount,
+                'total_amount' => (float) $order->total_amount,
+                'status' => $order->status,
+                'created_at' => $order->created_at->format('d/m/Y H:i'),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'order' => $orderData,
+                ],
+                'message' => 'Order berjaya dibuat!'
+            ], 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan semasa membuat order. Sila cuba lagi.',
+                'errors' => [
+                    'error' => 'Terjadi kesalahan semasa membuat order. Sila cuba lagi.'
+                ]
+            ], 500);
+        }
+    }
+
+    /**
      * Store new order (customer checkout)
      */
     public function store(Request $request)
@@ -146,6 +255,84 @@ class OrderController extends Controller
     public function trackForm()
     {
         return Inertia::render('Ecommerce/OrderTrackingForm');
+    }
+
+    /**
+     * API endpoint untuk submit order tracking form
+     */
+    public function apiTrackSubmit(Request $request, $order_number)
+    {
+        $data = $request->validate([
+            'customer_email' => 'required|email',
+        ]);
+
+        try {
+            // Find order by both order number and email for security
+            $order = Order::with('orderItems.product')->where('order_number', $order_number)
+                ->where('customer_email', $data['customer_email'])
+                ->firstOrFail();
+
+            // Generate temporary signed URL (valid for 30 minutes)
+            $trackingUrl = URL::temporarySignedRoute(
+                'ecommerce.order.show',
+                now()->addMinutes(30),
+                ['orderNumber' => $order->order_number]
+            );
+
+            // Prepare order data for response
+            $orderData = [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'customer_name' => $order->customer_name,
+                'customer_phone' => $order->customer_phone,
+                'customer_email' => $order->customer_email,
+                'delivery_method' => $order->delivery_method,
+                'payment_method' => $order->payment_method,
+                'subtotal' => (float) $order->subtotal,
+                'delivery_discount' => (float) $order->delivery_discount,
+                'payment_discount' => (float) $order->payment_discount,
+                'total_amount' => (float) $order->total_amount,
+                'status' => $order->status,
+                'created_at' => $order->created_at->format('d/m/Y H:i'),
+                'updated_at' => $order->updated_at->format('d/m/Y H:i'),
+                'order_items' => $order->orderItems->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'product_name' => $item->product_name,
+                        'product_price' => (float) $item->product_price,
+                        'quantity' => $item->quantity,
+                        'color' => $item->color,
+                        'subtotal' => (float) $item->subtotal,
+                        'product_image' => $item->product->image_url ?? 'https://placehold.co/300x300',
+                    ];
+                }),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'order' => $orderData,
+                    'tracking_url' => $trackingUrl,
+                ],
+                'message' => 'Order ditemui!'
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order tidak dijumpai. Sila pastikan nombor order dan email adalah betul.',
+                'errors' => [
+                    'order_number' => 'Order tidak dijumpai dengan maklumat yang diberikan'
+                ]
+            ], 404);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan semasa mencari order. Sila cuba lagi.',
+                'errors' => [
+                    'error' => 'Terjadi kesalahan semasa mencari order. Sila cuba lagi.'
+                ]
+            ], 500);
+        }
     }
 
     /**

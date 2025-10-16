@@ -4,6 +4,8 @@ use App\Http\Controllers\FAQController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\EcommerceController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,3 +50,11 @@ Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('api.cha
 // Settings API Routes (without CSRF protection)
 Route::post('/settings/chatbot-toggle', [SettingsController::class, 'toggleChatbot'])->name('api.settings.chatbot-toggle')->withoutMiddleware(['web']);
 Route::get('/settings/chatbot-status', [SettingsController::class, 'getChatbotStatus'])->name('api.settings.chatbot-status');
+
+// Ecommerce API Routes (without CSRF protection)
+Route::get('/ecommerce/products', [EcommerceController::class, 'apiIndex'])->name('api.ecommerce.products');
+Route::get('/ecommerce/products/{id}', [EcommerceController::class, 'apiShow'])->name('api.ecommerce.products.show');
+
+// Order API Routes (without CSRF protection)
+Route::post('/orders', [OrderController::class, 'apiStore'])->name('api.orders.store');
+Route::get('/orders/track/{order_number}', [OrderController::class, 'apiTrackSubmit'])->name('api.orders.track')->middleware('throttle:5,1');
