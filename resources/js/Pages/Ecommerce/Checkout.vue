@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import EcommerceLayout from '@/Layouts/EcommerceLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 
@@ -24,7 +24,28 @@ const form = ref({
     phone: '',
     email: '',
     delivery_method: '',
-    payment_method: ''
+    payment_method: '',
+    bank_code: 'MB2U0227' // Default payment gateway
+});
+
+// Payment gateways
+const paymentGateways = ref({
+    fpx: {},
+    ewallet: {},
+    card: {}
+});
+
+// Load payment gateways on mount
+onMounted(async () => {
+    try {
+        const response = await fetch('/api/payment/gateways');
+        const result = await response.json();
+        if (result.success) {
+            paymentGateways.value = result.data;
+        }
+    } catch (error) {
+        console.error('Failed to load payment gateways:', error);
+    }
 });
 
 // Delivery methods with discounts
@@ -93,45 +114,68 @@ const formatPrice = (price) => {
     return `RM${price.toFixed(2)}`;
 };
 
-// Submit checkout
+// Submit checkout dengan Billplz
 const isSubmitting = ref(false);
 const errors = ref({});
 
-const submitCheckout = () => {
+const submitCheckout = async () => {
     // Reset errors
     errors.value = {};
 
     // Basic validation
     if (!form.value.name || !form.value.phone || !form.value.email ||
-        !form.value.delivery_method || !form.value.payment_method) {
-        errors.value.general = 'Sila lengkapkan semua maklumat yang diperlukan';
+        !form.value.delivery_method || !form.value.payment_method || !form.value.bank_code) {
+        errors.value.general = 'Sila lengkapkan semua maklumat yang diperlukan termasuk pilihan pembayaran';
+        return;
+    }
+
+    // Email validation
+    if (!form.value.email.includes('@')) {
+        errors.value.general = 'Sila masukkan alamat email yang sah';
         return;
     }
 
     isSubmitting.value = true;
 
-    // Submit form data
-    router.post(route('ecommerce.order.store'), {
-        customer_name: form.value.name,
-        customer_phone: form.value.phone,
-        customer_email: form.value.email,
-        delivery_method: form.value.delivery_method,
-        payment_method: form.value.payment_method,
-        product_id: props.product.id,
-        quantity: props.quantity,
-        color: props.color,
-    }, {
-        onSuccess: () => {
-            // Success handled by redirect in controller
-        },
-        onError: (page) => {
-            errors.value = page.props.errors || {};
+    try {
+        // Call Billplz API
+        const response = await fetch('/api/checkout/billplz', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                customer_name: form.value.name,
+                customer_phone: form.value.phone,
+                customer_email: form.value.email,
+                delivery_method: form.value.delivery_method,
+                payment_method: form.value.payment_method,
+                product_id: props.product.id,
+                quantity: props.quantity,
+                color: props.color,
+                bank_code: form.value.bank_code,
+            }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Redirect to Billplz payment page
+            window.location.href = result.data.bill_url;
+        } else {
+            // Show error message
+            errors.value.general = result.message || 'Gagal membuat pembayaran. Sila cuba lagi.';
+            if (result.errors) {
+                errors.value = { ...errors.value, ...result.errors };
+            }
             isSubmitting.value = false;
-        },
-        onFinish: () => {
-            // This will run after success or error
         }
-    });
+    } catch (error) {
+        console.error('Checkout error:', error);
+        errors.value.general = 'Ralat rangkaian. Sila semak sambungan internet anda dan cuba lagi.';
+        isSubmitting.value = false;
+    }
 };
 </script>
 
@@ -241,6 +285,71 @@ const submitCheckout = () => {
                                 </label>
                             </div>
                         </div>
+
+                        <!-- Billplz Payment Gateway Selection -->
+                        <div class="bg-white rounded-2xl shadow-sm p-6">
+                            <h2 class="text-xl font-semibold text-gray-900 mb-6">Choose Payment Gateway</h2>
+
+                            <!-- FPX Banks -->
+                            <div v-if="Object.keys(paymentGateways.fpx).length > 0" class="mb-6">
+                                <h3 class="text-sm font-semibold text-gray-700 mb-3">Online Banking (FPX)</h3>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label v-for="(name, code) in paymentGateways.fpx" :key="code" :class="[
+                                        'flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all',
+                                        form.bank_code === code
+                                            ? 'border-blue-500 bg-blue-50'
+                                            : 'border-gray-200 hover:border-gray-300'
+                                    ]">
+                                        <input v-model="form.bank_code" :value="code" type="radio"
+                                            class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                                        <span class="ml-3 text-sm font-medium text-gray-900">{{ name }}</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- E-Wallets -->
+                            <div v-if="Object.keys(paymentGateways.ewallet).length > 0" class="mb-6">
+                                <h3 class="text-sm font-semibold text-gray-700 mb-3">E-Wallets</h3>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label v-for="(name, code) in paymentGateways.ewallet" :key="code" :class="[
+                                        'flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all',
+                                        form.bank_code === code
+                                            ? 'border-green-500 bg-green-50'
+                                            : 'border-gray-200 hover:border-gray-300'
+                                    ]">
+                                        <input v-model="form.bank_code" :value="code" type="radio"
+                                            class="w-4 h-4 text-green-600 focus:ring-green-500">
+                                        <span class="ml-3 text-sm font-medium text-gray-900">{{ name }}</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Cards -->
+                            <div v-if="Object.keys(paymentGateways.card).length > 0">
+                                <h3 class="text-sm font-semibold text-gray-700 mb-3">Credit/Debit Cards</h3>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label v-for="(name, code) in paymentGateways.card" :key="code" :class="[
+                                        'flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all',
+                                        form.bank_code === code
+                                            ? 'border-purple-500 bg-purple-50'
+                                            : 'border-gray-200 hover:border-gray-300'
+                                    ]">
+                                        <input v-model="form.bank_code" :value="code" type="radio"
+                                            class="w-4 h-4 text-purple-600 focus:ring-purple-500">
+                                        <span class="ml-3 text-sm font-medium text-gray-900">{{ name }}</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Selected Payment Info -->
+                            <div v-if="form.bank_code" class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p class="text-sm text-blue-800">
+                                    <span class="font-semibold">Selected:</span>
+                                    {{Object.values(paymentGateways).flatMap(g => Object.entries(g)).find(([code]) =>
+                                        code === form.bank_code)?.[1] || form.bank_code}}
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Order Summary -->
@@ -291,8 +400,26 @@ const submitCheckout = () => {
                             <!-- Submit Button -->
                             <button @click="submitCheckout" :disabled="isSubmitting"
                                 class="w-full py-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                                {{ isSubmitting ? 'Processing...' : 'Place Order' }}
+                                <span v-if="isSubmitting" class="flex items-center justify-center">
+                                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                            stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                    Processing...
+                                </span>
+                                <span v-else>Proceed to Payment</span>
                             </button>
+
+                            <!-- Payment Info -->
+                            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                                <p class="text-xs text-gray-600 text-center">
+                                    🔒 Secure payment powered by Billplz
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

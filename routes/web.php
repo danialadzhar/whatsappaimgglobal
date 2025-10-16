@@ -9,6 +9,7 @@ use App\Http\Controllers\EcommerceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -45,6 +46,9 @@ Route::middleware('throttle:20,1')->group(function () {
 // Order Routes (Public)
 Route::post('/ecommerce/order', [OrderController::class, 'store'])->name('ecommerce.order.store');
 Route::get('/ecommerce/order/success/{id}', [OrderController::class, 'success'])->name('ecommerce.order.success');
+
+// Billplz Redirect Route (Public - customer redirect selepas payment)
+Route::get('/billplz/redirect', [WebhookController::class, 'handleBillplzRedirect'])->name('billplz.redirect');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

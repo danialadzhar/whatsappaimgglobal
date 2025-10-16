@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'billplz' => [
+        'api_key' => env('BILLPLZ_API_KEY'),
+        'collection_id' => env('BILLPLZ_COLLECTION_ID'),
+        'x_signature_key' => env('BILLPLZ_X_SIGNATURE_KEY'),
+        'sandbox' => env('BILLPLZ_SANDBOX', true),
+        'callback_url' => env('APP_URL') . '/api/webhook/billplz',
+        'redirect_url' => env('APP_URL') . '/billplz/redirect',
+    ],
+
 ];

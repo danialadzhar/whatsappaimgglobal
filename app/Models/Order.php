@@ -20,6 +20,13 @@ class Order extends Model
         'total_amount',
         'status',
         'notes',
+        // Billplz payment fields
+        'billplz_bill_id',
+        'billplz_collection_id',
+        'payment_status',
+        'paid_at',
+        'idempotency_key',
+        'payment_metadata',
     ];
 
     protected $casts = [
@@ -27,6 +34,8 @@ class Order extends Model
         'delivery_discount' => 'decimal:2',
         'payment_discount' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'paid_at' => 'datetime',
+        'payment_metadata' => 'array',
     ];
 
     /**

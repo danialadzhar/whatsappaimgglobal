@@ -6,6 +6,8 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\EcommerceController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -58,3 +60,10 @@ Route::get('/ecommerce/products/{id}', [EcommerceController::class, 'apiShow'])-
 // Order API Routes (without CSRF protection)
 Route::post('/orders', [OrderController::class, 'apiStore'])->name('api.orders.store');
 Route::get('/orders/track/{order_number}', [OrderController::class, 'apiTrackSubmit'])->name('api.orders.track')->middleware('throttle:5,1');
+
+// Billplz Payment Routes (without CSRF protection)
+Route::post('/checkout/billplz', [CheckoutController::class, 'createDirectPayment'])->name('api.checkout.billplz');
+Route::get('/payment/gateways', [CheckoutController::class, 'getPaymentGateways'])->name('api.payment.gateways');
+
+// Billplz Webhook (public endpoint untuk Billplz server callback)
+Route::post('/webhook/billplz', [WebhookController::class, 'handleBillplzCallback'])->name('api.webhook.billplz');
