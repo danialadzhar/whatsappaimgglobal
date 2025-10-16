@@ -64,6 +64,9 @@ Route::middleware('auth')->group(function () {
     // Settings Routes
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
 
+    // E-Commerce Settings Routes
+    Route::get('/ecommerce/settings', [SettingsController::class, 'ecommerceSettings'])->name('ecommerce.settings.index');
+
     // Product Management Routes
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');

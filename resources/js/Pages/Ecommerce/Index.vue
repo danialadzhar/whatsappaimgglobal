@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import EcommerceLayout from '@/Layouts/EcommerceLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import ProductCard from '@/Components/ProductCard.vue';
@@ -14,6 +14,52 @@ const selectedCategory = ref('all');
 const selectedPriceRange = ref('all');
 const sortBy = ref('featured');
 const searchQuery = ref('');
+
+// Countdown Timer State
+const days = ref(0);
+const hours = ref(0);
+const minutes = ref(0);
+const seconds = ref(0);
+let countdownInterval = null;
+
+// Set target date (4 days from now based on the image)
+const targetDate = new Date();
+targetDate.setDate(targetDate.getDate() + 3);
+targetDate.setHours(targetDate.getHours() + 11);
+targetDate.setMinutes(targetDate.getMinutes() + 31);
+targetDate.setSeconds(targetDate.getSeconds() + 8);
+
+const updateCountdown = () => {
+    const now = new Date().getTime();
+    const distance = targetDate.getTime() - now;
+
+    if (distance < 0) {
+        days.value = 0;
+        hours.value = 0;
+        minutes.value = 0;
+        seconds.value = 0;
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+        return;
+    }
+
+    days.value = Math.floor(distance / (1000 * 60 * 60 * 24));
+    hours.value = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    minutes.value = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    seconds.value = Math.floor((distance % (1000 * 60)) / 1000);
+};
+
+onMounted(() => {
+    updateCountdown();
+    countdownInterval = setInterval(updateCountdown, 1000);
+});
+
+onUnmounted(() => {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+    }
+});
 
 // Categories untuk filter
 const categories = [
@@ -94,6 +140,52 @@ const filteredProducts = computed(() => {
 
     <EcommerceLayout>
         <div class="min-h-screen bg-gray-50">
+            <!-- Countdown Timer Banner -->
+            <div
+                class="countdown-banner bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-3 sm:py-4">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
+                        <!-- Urgency Text -->
+                        <div class="text-center sm:text-left">
+                            <p class="text-xs sm:text-sm font-medium text-gray-300">
+                                🔥 <span class="text-yellow-400 font-semibold">TAWARAN TERHAD!</span> Promosi Ansuran
+                                Berakhir Dalam:
+                            </p>
+                        </div>
+
+                        <!-- Countdown Display -->
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <!-- Days -->
+                            <div class="countdown-box">
+                                <div class="countdown-value">{{ String(days).padStart(2, '0') }}</div>
+                                <div class="countdown-label">Hari</div>
+                            </div>
+                            <span class="text-lg sm:text-xl font-bold text-gray-400">:</span>
+
+                            <!-- Hours -->
+                            <div class="countdown-box">
+                                <div class="countdown-value">{{ String(hours).padStart(2, '0') }}</div>
+                                <div class="countdown-label">Jam</div>
+                            </div>
+                            <span class="text-lg sm:text-xl font-bold text-gray-400">:</span>
+
+                            <!-- Minutes -->
+                            <div class="countdown-box">
+                                <div class="countdown-value">{{ String(minutes).padStart(2, '0') }}</div>
+                                <div class="countdown-label">Min</div>
+                            </div>
+                            <span class="text-lg sm:text-xl font-bold text-gray-400">:</span>
+
+                            <!-- Seconds -->
+                            <div class="countdown-box">
+                                <div class="countdown-value animate-pulse">{{ String(seconds).padStart(2, '0') }}</div>
+                                <div class="countdown-label">Saat</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Hero Banner -->
             <div class="relative bg-gradient-to-r from-pink-50 to-blue-50 overflow-hidden">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
@@ -220,12 +312,91 @@ html {
     background: #555;
 }
 
+/* Countdown Timer Styles */
+.countdown-banner {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.countdown-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 6px 10px;
+    min-width: 50px;
+    transition: all 0.3s ease;
+}
+
+.countdown-box:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.countdown-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+}
+
+.countdown-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: #d1d5db;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Responsive countdown styles */
+@media (min-width: 640px) {
+    .countdown-box {
+        padding: 8px 14px;
+        min-width: 60px;
+        border-radius: 10px;
+    }
+
+    .countdown-value {
+        font-size: 1.75rem;
+    }
+
+    .countdown-label {
+        font-size: 0.7rem;
+        margin-top: 4px;
+    }
+}
+
+@media (max-width: 639px) {
+    .countdown-box {
+        padding: 5px 8px;
+        min-width: 45px;
+    }
+
+    .countdown-value {
+        font-size: 1.25rem;
+    }
+
+    .countdown-label {
+        font-size: 0.6rem;
+    }
+}
+
 /* Sticky filter section improvements */
 .filter-section {
     position: -webkit-sticky;
     position: sticky;
-    top: 4rem;
-    /* 64px untuk navigation height */
+    top: 95px;
+    /* Adjusted for countdown banner height (py-4 = 32px + content ~40px) */
     z-index: 40;
     transition: all 0.3s ease;
 }
@@ -233,8 +404,15 @@ html {
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
     .filter-section {
-        top: 4rem;
-        /* Tetap sama untuk mobile */
+        top: 100px;
+        /* Adjusted for mobile countdown banner height (stacked layout is taller) */
+    }
+}
+
+@media (min-width: 640px) and (max-width: 768px) {
+    .filter-section {
+        top: 68px;
+        /* Adjusted for tablet size */
     }
 }
 

@@ -8,6 +8,21 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
+const expandedMenus = ref(['E-Commerce']); // Track expanded menu items
+
+// Toggle submenu
+const toggleSubmenu = (itemName) => {
+    const index = expandedMenus.value.indexOf(itemName);
+    if (index > -1) {
+        expandedMenus.value.splice(index, 1);
+    } else {
+        expandedMenus.value.push(itemName);
+    }
+};
+
+const isExpanded = (itemName) => {
+    return expandedMenus.value.includes(itemName);
+};
 
 // Navigation items sesuai design WallPay
 const navigationItems = ref([
@@ -35,23 +50,37 @@ const navigationItems = ref([
         icon: '💬',
         active: false
     },
-    {
-        name: 'Settings',
-        href: 'settings',
-        icon: '⚙️',
-        active: false
-    },
+    // {
+    //     name: 'Settings',
+    //     href: 'settings',
+    //     icon: '⚙️',
+    //     active: false
+    // },
     {
         name: 'E-Commerce',
         href: 'products.index',
         icon: '🛒',
-        active: false
-    },
-    {
-        name: 'Orders',
-        href: 'orders.index',
-        icon: '📦',
-        active: false
+        active: false,
+        children: [
+            {
+                name: 'Products',
+                href: 'products.index',
+                icon: '📦',
+                active: false
+            },
+            {
+                name: 'Orders',
+                href: 'orders.index',
+                icon: '📋',
+                active: false
+            },
+            {
+                name: 'Settings',
+                href: 'settings',
+                icon: '⚙️',
+                active: false
+            }
+        ]
     },
     //   {
     //     name: 'Cards',
@@ -117,17 +146,57 @@ const supportItems = ref([
                     <div class="px-3">
                         <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">General</p>
                         <nav class="mt-2 space-y-1">
-                            <Link v-for="item in navigationItems" :key="item.name"
-                                :href="['dashboard', 'customers', 'faq', 'chat', 'settings', 'products.index', 'orders.index'].includes(item.href) ? route(item.href) : item.href"
-                                :class="[
-                                    item.active
-                                        ? 'bg-blue-50 border-r-2 border-blue-600 text-blue-700'
-                                        : 'text-gray-700 hover:bg-gray-50',
-                                    'group flex items-center px-3 py-2 text-sm font-medium rounded-l-lg'
-                                ]">
-                            <span class="text-lg mr-3">{{ item.icon }}</span>
-                            {{ item.name }}
-                            </Link>
+                            <template v-for="item in navigationItems" :key="item.name">
+                                <!-- Parent Menu Item with Children -->
+                                <div v-if="item.children">
+                                    <button @click="toggleSubmenu(item.name)" :class="[
+                                        item.active
+                                            ? 'bg-blue-50 border-r-2 border-blue-600 text-blue-700'
+                                            : 'text-gray-700 hover:bg-gray-50',
+                                        'group flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-l-lg'
+                                    ]">
+                                        <div class="flex items-center">
+                                            <span class="text-lg mr-3">{{ item.icon }}</span>
+                                            {{ item.name }}
+                                        </div>
+                                        <svg :class="[
+                                            'w-4 h-4 transition-transform duration-200',
+                                            isExpanded(item.name) ? 'transform rotate-180' : ''
+                                        ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- Submenu Items -->
+                                    <div v-show="isExpanded(item.name)" class="ml-6 mt-1 space-y-1">
+                                        <Link v-for="child in item.children" :key="child.name"
+                                            :href="['dashboard', 'customers', 'faq', 'chat', 'settings', 'products.index', 'orders.index'].includes(child.href) ? route(child.href) : child.href"
+                                            :class="[
+                                                child.active
+                                                    ? 'bg-blue-50 border-r-2 border-blue-600 text-blue-700'
+                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                                                'group flex items-center px-3 py-2 text-sm font-medium rounded-l-lg'
+                                            ]">
+                                        <span class="text-base mr-3">{{ child.icon }}</span>
+                                        {{ child.name }}
+                                        </Link>
+                                    </div>
+                                </div>
+
+                                <!-- Regular Menu Item without Children -->
+                                <Link v-else
+                                    :href="['dashboard', 'customers', 'faq', 'chat', 'settings', 'products.index', 'orders.index'].includes(item.href) ? route(item.href) : item.href"
+                                    :class="[
+                                        item.active
+                                            ? 'bg-blue-50 border-r-2 border-blue-600 text-blue-700'
+                                            : 'text-gray-700 hover:bg-gray-50',
+                                        'group flex items-center px-3 py-2 text-sm font-medium rounded-l-lg'
+                                    ]">
+                                <span class="text-lg mr-3">{{ item.icon }}</span>
+                                {{ item.name }}
+                                </Link>
+                            </template>
                         </nav>
                     </div>
 
@@ -216,12 +285,43 @@ const supportItems = ref([
                         <span class="text-xl font-bold text-gray-900">WallPay</span>
                     </div>
                     <nav class="mt-5 px-2 space-y-1">
-                        <ResponsiveNavLink v-for="item in navigationItems" :key="item.name"
-                            :href="item.href === 'dashboard' || item.href === 'customers' ? route(item.href) : item.href"
-                            :active="item.active">
-                            <span class="text-lg mr-3">{{ item.icon }}</span>
-                            {{ item.name }}
-                        </ResponsiveNavLink>
+                        <template v-for="item in navigationItems" :key="item.name">
+                            <!-- Parent Menu Item with Children -->
+                            <div v-if="item.children">
+                                <button @click="toggleSubmenu(item.name)"
+                                    class="w-full flex items-center justify-between px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <span class="text-lg mr-3">{{ item.icon }}</span>
+                                        {{ item.name }}
+                                    </div>
+                                    <svg :class="[
+                                        'w-4 h-4 transition-transform duration-200',
+                                        isExpanded(item.name) ? 'transform rotate-180' : ''
+                                    ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                <!-- Submenu Items -->
+                                <div v-show="isExpanded(item.name)" class="ml-6 mt-1 space-y-1">
+                                    <ResponsiveNavLink v-for="child in item.children" :key="child.name"
+                                        :href="['dashboard', 'customers', 'faq', 'chat', 'settings', 'products.index', 'orders.index'].includes(child.href) ? route(child.href) : child.href"
+                                        :active="child.active">
+                                        <span class="text-base mr-3">{{ child.icon }}</span>
+                                        {{ child.name }}
+                                    </ResponsiveNavLink>
+                                </div>
+                            </div>
+
+                            <!-- Regular Menu Item without Children -->
+                            <ResponsiveNavLink v-else
+                                :href="['dashboard', 'customers', 'faq', 'chat', 'settings', 'products.index', 'orders.index'].includes(item.href) ? route(item.href) : item.href"
+                                :active="item.active">
+                                <span class="text-lg mr-3">{{ item.icon }}</span>
+                                {{ item.name }}
+                            </ResponsiveNavLink>
+                        </template>
                     </nav>
                 </div>
                 <div class="flex-shrink-0 flex border-t border-gray-200 p-4">

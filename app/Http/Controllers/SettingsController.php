@@ -89,4 +89,26 @@ class SettingsController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Display e-commerce settings page
+     * Papar halaman settings e-commerce
+     */
+    public function ecommerceSettings()
+    {
+        // Placeholder for e-commerce settings
+        // Will be implemented with database storage later
+        $settings = [
+            'countdown_enabled' => true,
+            'countdown_days' => 3,
+            'countdown_hours' => 11,
+            'countdown_minutes' => 31,
+            'urgency_text' => '🔥 TAWARAN TERHAD! Promosi Ansuran Berakhir Dalam:',
+            'background_color' => '#1f2937',
+        ];
+
+        return Inertia::render('Settings/Index', [
+            'settings' => $settings
+        ]);
+    }
 }

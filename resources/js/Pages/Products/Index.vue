@@ -272,9 +272,8 @@
                                             </option>
                                         </select>
                                         <p class="text-xs text-gray-500 mt-1">
-                                            or <button type="button" @click="showCategoryModal = true"
-                                                class="text-blue-600 underline hover:text-blue-800">Add new Category
-                                                here</button>
+                                            or Add new Category <button type="button" @click="showCategoryModal = true"
+                                                class="text-blue-600 underline hover:text-blue-800">here</button>
                                         </p>
                                     </div>
 
