@@ -550,4 +550,72 @@ class OrderController extends Controller
         $percentage = $discounts[$method] ?? 0;
         return $subtotal * ($percentage / 100);
     }
+
+    /**
+     * API endpoint untuk get order by order_number
+     * Digunakan untuk success page selepas payment
+     */
+    public function apiGetByOrderNumber($order_number)
+    {
+        try {
+            // Find order dengan order items
+            $order = Order::with('orderItems.product')
+                ->where('order_number', $order_number)
+                ->firstOrFail();
+
+            // Prepare order data untuk response
+            $orderData = [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'customer_name' => $order->customer_name,
+                'customer_phone' => $order->customer_phone,
+                'customer_email' => $order->customer_email,
+                'delivery_method' => $order->delivery_method,
+                'payment_method' => $order->payment_method,
+                'subtotal' => (float) $order->subtotal,
+                'delivery_discount' => (float) $order->delivery_discount,
+                'payment_discount' => (float) $order->payment_discount,
+                'total_amount' => (float) $order->total_amount,
+                'status' => $order->status,
+                'payment_status' => $order->payment_status,
+                'created_at' => $order->created_at->format('d/m/Y H:i'),
+                'updated_at' => $order->updated_at->format('d/m/Y H:i'),
+                'order_items' => $order->orderItems->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'product_name' => $item->product_name,
+                        'product_price' => (float) $item->product_price,
+                        'quantity' => $item->quantity,
+                        'color' => $item->color,
+                        'subtotal' => (float) $item->subtotal,
+                        'product_image' => $item->product->image_url ?? 'https://placehold.co/300x300',
+                    ];
+                }),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'order' => $orderData,
+                ],
+                'message' => 'Order found successfully'
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order tidak dijumpai',
+                'errors' => [
+                    'order_number' => 'Order dengan nombor ini tidak dijumpai'
+                ]
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi ralat semasa mencari order',
+                'errors' => [
+                    'error' => $e->getMessage()
+                ]
+            ], 500);
+        }
+    }
 }

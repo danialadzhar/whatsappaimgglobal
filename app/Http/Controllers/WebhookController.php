@@ -163,14 +163,33 @@ class WebhookController extends Controller
             // Parse redirect data (sama format dengan webhook)
             $webhookData = $this->billplz->parseWebhookData($request->all());
 
+            // Debug logging untuk troubleshoot
+            Log::info('Billplz Redirect Data', [
+                'raw_request' => $request->all(),
+                'parsed_data' => $webhookData,
+                'order_number' => $webhookData['order_number'],
+                'bill_id' => $webhookData['bill_id'],
+            ]);
+
             // Find order
             $order = Order::where('order_number', $webhookData['order_number'])
                 ->orWhere('billplz_bill_id', $webhookData['bill_id'])
                 ->first();
 
+            // Fallback: try to find by order_id from URL parameters
+            if (!$order && $request->has('order_id')) {
+                $order = Order::find($request->get('order_id'));
+                Log::info('Found order by order_id fallback', [
+                    'order_id' => $request->get('order_id'),
+                    'order_found' => $order ? $order->order_number : 'not found'
+                ]);
+            }
+
             if (!$order) {
-                return redirect()->route('ecommerce.index')
-                    ->with('error', 'Order tidak dijumpai');
+                // Redirect to frontend error page
+                $frontendUrl = config('services.billplz.frontend_success_url');
+                $errorUrl = str_replace('/order/success', '/order/error', $frontendUrl);
+                return redirect($errorUrl . '?type=order_not_found');
             }
 
             // Update order if not yet updated (webhook might not arrive yet)
@@ -179,22 +198,36 @@ class WebhookController extends Controller
                     'payment_status' => 'paid',
                     'status' => 'processing',
                     'paid_at' => $webhookData['paid_at'] ?? now(),
+                    'payment_metadata' => array_merge(
+                        $order->payment_metadata ?? [],
+                        [
+                            'redirect_data' => $webhookData,
+                            'paid_at' => $webhookData['paid_at'],
+                            'transaction_id' => $webhookData['transaction_id'],
+                        ]
+                    ),
+                ]);
+
+                Log::info('Billplz Redirect: Payment successful', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
                 ]);
             }
 
-            // Redirect to success or failed page
+            // Redirect to Next.js frontend success or failed page
+            $frontendUrl = config('services.billplz.frontend_success_url');
+
             if ($webhookData['paid']) {
-                return redirect()->route('ecommerce.order.success', $order->id)
-                    ->with('success', 'Pembayaran berjaya!');
+                return redirect($frontendUrl . '/' . $order->order_number . '?payment=success');
             } else {
-                return redirect()->route('ecommerce.checkout', $order->orderItems->first()->product_id)
-                    ->with('error', 'Pembayaran gagal. Sila cuba lagi.');
+                return redirect($frontendUrl . '/' . $order->order_number . '?payment=failed');
             }
         } catch (\Exception $e) {
             Log::error('Billplz Redirect Error: ' . $e->getMessage());
 
-            return redirect()->route('ecommerce.index')
-                ->with('error', 'Terjadi kesalahan. Sila cuba lagi.');
+            $frontendUrl = config('services.billplz.frontend_success_url', 'http://localhost:3000/order/success');
+            $errorUrl = str_replace('/order/success', '/order/error', $frontendUrl);
+            return redirect($errorUrl . '?type=system_error');
         }
     }
 }

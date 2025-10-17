@@ -135,17 +135,29 @@ class BillplzService
      */
     public function parseWebhookData($data)
     {
+        // Handle different webhook data formats
+        $orderNumber = null;
+
+        // Try different possible keys for order number
+        if (isset($data['reference_2'])) {
+            $orderNumber = $data['reference_2'];
+        } elseif (isset($data['billplz']['reference_2'])) {
+            $orderNumber = $data['billplz']['reference_2'];
+        } elseif (isset($data['order_number'])) {
+            $orderNumber = $data['order_number'];
+        }
+
         return [
-            'bill_id' => $data['id'] ?? null,
-            'collection_id' => $data['collection_id'] ?? null,
-            'paid' => filter_var($data['paid'] ?? false, FILTER_VALIDATE_BOOLEAN),
-            'state' => $data['state'] ?? 'due',
-            'amount' => isset($data['amount']) ? (float) $data['amount'] / 100 : 0, // Convert sen to RM
-            'paid_amount' => isset($data['paid_amount']) ? (float) $data['paid_amount'] / 100 : 0,
-            'paid_at' => $data['paid_at'] ?? null,
-            'transaction_id' => $data['transaction_id'] ?? null,
-            'transaction_status' => $data['transaction_status'] ?? null,
-            'order_number' => $data['reference_2'] ?? null,
+            'bill_id' => $data['id'] ?? $data['billplz']['id'] ?? null,
+            'collection_id' => $data['collection_id'] ?? $data['billplz']['collection_id'] ?? null,
+            'paid' => filter_var($data['paid'] ?? $data['billplz']['paid'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            'state' => $data['state'] ?? $data['billplz']['state'] ?? 'due',
+            'amount' => isset($data['amount']) ? (float) $data['amount'] / 100 : (isset($data['billplz']['amount']) ? (float) $data['billplz']['amount'] / 100 : 0),
+            'paid_amount' => isset($data['paid_amount']) ? (float) $data['paid_amount'] / 100 : (isset($data['billplz']['paid_amount']) ? (float) $data['billplz']['paid_amount'] / 100 : 0),
+            'paid_at' => $data['paid_at'] ?? $data['billplz']['paid_at'] ?? null,
+            'transaction_id' => $data['transaction_id'] ?? $data['billplz']['transaction_id'] ?? null,
+            'transaction_status' => $data['transaction_status'] ?? $data['billplz']['transaction_status'] ?? null,
+            'order_number' => $orderNumber,
         ];
     }
 

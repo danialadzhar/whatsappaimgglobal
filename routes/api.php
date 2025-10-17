@@ -59,6 +59,7 @@ Route::get('/ecommerce/products/{id}', [EcommerceController::class, 'apiShow'])-
 
 // Order API Routes (without CSRF protection)
 Route::post('/orders', [OrderController::class, 'apiStore'])->name('api.orders.store');
+Route::get('/orders/{order_number}', [OrderController::class, 'apiGetByOrderNumber'])->name('api.orders.get');
 Route::get('/orders/track/{order_number}', [OrderController::class, 'apiTrackSubmit'])->name('api.orders.track')->middleware('throttle:5,1');
 
 // Billplz Payment Routes (without CSRF protection)
