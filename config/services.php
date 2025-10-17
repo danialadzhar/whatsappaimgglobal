@@ -42,7 +42,7 @@ return [
         'sandbox' => env('BILLPLZ_SANDBOX', true),
         'callback_url' => env('APP_URL') . '/api/webhook/billplz',
         'redirect_url' => env('APP_URL') . '/billplz/redirect',
-        'frontend_success_url' => env('FRONTEND_URL', 'http://localhost:3000') . '/order/success',
+        'frontend_success_url' => env('FRONTEND_URL', 'http://localhost:3000') . '/shop/order/success',
     ],
 
 ];

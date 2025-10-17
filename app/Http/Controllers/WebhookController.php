@@ -188,7 +188,7 @@ class WebhookController extends Controller
             if (!$order) {
                 // Redirect to frontend error page
                 $frontendUrl = config('services.billplz.frontend_success_url');
-                $errorUrl = str_replace('/order/success', '/order/error', $frontendUrl);
+                $errorUrl = str_replace('/shop/order/success', '/shop/order/error', $frontendUrl);
                 return redirect($errorUrl . '?type=order_not_found');
             }
 
@@ -225,8 +225,8 @@ class WebhookController extends Controller
         } catch (\Exception $e) {
             Log::error('Billplz Redirect Error: ' . $e->getMessage());
 
-            $frontendUrl = config('services.billplz.frontend_success_url', 'http://localhost:3000/order/success');
-            $errorUrl = str_replace('/order/success', '/order/error', $frontendUrl);
+            $frontendUrl = config('services.billplz.frontend_success_url', 'http://localhost:3000/shop/order/success');
+            $errorUrl = str_replace('/shop/order/success', '/shop/order/error', $frontendUrl);
             return redirect($errorUrl . '?type=system_error');
         }
     }
