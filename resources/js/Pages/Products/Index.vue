@@ -126,7 +126,7 @@
                                                     </div>
                                                     <div class="text-sm text-gray-500">{{
                                                         product.description?.substring(0,
-                                                            30) }}...</div>
+                                                        30) }}...</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -137,10 +137,10 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900">RM{{ product.price }}</div>
                                             <div v-if="product.original_price"
                                                 class="text-xs text-gray-500 line-through">
                                                 RM{{ product.original_price }}</div>
+                                            <div class="text-sm text-gray-900">RM{{ product.price }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span :class="product.stock > 10 ? 'text-green-600' : 'text-red-600'"

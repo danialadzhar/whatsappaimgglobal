@@ -62,12 +62,12 @@
                                 </div>
                             </div>
 
-                            <!-- Normal Price and Sales Price -->
+                            <!-- Original & Sales Price -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Normal Price
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Original Price
                                         (RM)</label>
-                                    <input v-model.number="form.normal_price" type="number" step="0.01"
+                                    <input v-model.number="form.original_price" type="number" step="0.01"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                                 </div>
                                 <div>
@@ -81,33 +81,31 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
-                                    <select v-model="form.color"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <option value="">Pilih Warna</option>
-                                        <option value="Black">Black</option>
-                                        <option value="White">White</option>
-                                        <option value="Silver">Silver</option>
-                                        <option value="Gold">Gold</option>
-                                        <option value="Blue">Blue</option>
-                                        <option value="Red">Red</option>
-                                        <option value="Purple">Purple</option>
-                                        <option value="Green">Green</option>
-                                        <option value="Pink">Pink</option>
-                                        <option value="Gray">Gray</option>
-                                    </select>
+                                    <div class="flex gap-2">
+                                        <select v-model="form.color"
+                                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="">Pilih Warna</option>
+                                            <option v-for="c in colors" :key="c" :value="c">{{ c }}</option>
+                                        </select>
+                                        <button type="button" @click="showColorModal = true"
+                                            class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
+                                            Add Color
+                                        </button>
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Storage</label>
-                                    <select v-model="form.storage"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <option value="">Pilih Storage</option>
-                                        <option value="64GB">64GB</option>
-                                        <option value="128GB">128GB</option>
-                                        <option value="256GB">256GB</option>
-                                        <option value="512GB">512GB</option>
-                                        <option value="1TB">1TB</option>
-                                        <option value="2TB">2TB</option>
-                                    </select>
+                                    <div class="flex gap-2">
+                                        <select v-model="form.storage"
+                                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="">Pilih Storage</option>
+                                            <option v-for="s in storages" :key="s" :value="s">{{ s }}</option>
+                                        </select>
+                                        <button type="button" @click="showStorageModal = true"
+                                            class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
+                                            Add Storage
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -234,6 +232,90 @@
                         </div>
                     </div>
                 </Teleport>
+
+                <!-- Color Modal -->
+                <Teleport to="body">
+                    <div v-if="showColorModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog"
+                        aria-modal="true">
+                        <div
+                            class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                                @click="closeColorModal"></div>
+                            <div
+                                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-lg font-medium text-gray-900">Add New Color</h3>
+                                        <button @click="closeColorModal" class="text-gray-400 hover:text-gray-500">
+                                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <form @submit.prevent="submitColor" class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Color
+                                                Name</label>
+                                            <input v-model="colorForm.name" placeholder="Contoh: Black" type="text"
+                                                required
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                        </div>
+                                        <div class="flex justify-end gap-3 pt-4">
+                                            <button type="button" @click="closeColorModal"
+                                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+                                            <button type="submit"
+                                                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">Add
+                                                Color</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Teleport>
+
+                <!-- Storage Modal -->
+                <Teleport to="body">
+                    <div v-if="showStorageModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog"
+                        aria-modal="true">
+                        <div
+                            class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                                @click="closeStorageModal"></div>
+                            <div
+                                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-lg font-medium text-gray-900">Add New Storage</h3>
+                                        <button @click="closeStorageModal" class="text-gray-400 hover:text-gray-500">
+                                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <form @submit.prevent="submitStorage" class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Storage
+                                                Size</label>
+                                            <input v-model="storageForm.name" placeholder="Contoh: 256GB" type="text"
+                                                required
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                        </div>
+                                        <div class="flex justify-end gap-3 pt-4">
+                                            <button type="button" @click="closeStorageModal"
+                                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+                                            <button type="submit"
+                                                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">Add
+                                                Storage</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Teleport>
             </div>
         </AuthenticatedLayout>
     </div>
@@ -260,20 +342,28 @@ const props = defineProps({
 
 // State
 const showCategoryModal = ref(false);
+const showColorModal = ref(false);
+const showStorageModal = ref(false);
 const imagePreview = ref(null);
 const imageFile = ref(null);
 const dropzoneElement = ref(null);
 const dropzoneInstance = ref(null);
 const categories = ref(props.categories || []);
 const categoryForm = ref({ name: '' });
+const colorForm = ref({ name: '' });
+const storageForm = ref({ name: '' });
 const isSubmitting = ref(false);
+
+// Senarai dari DB
+const colors = ref([]);
+const storages = ref([]);
 
 // Form data
 const form = ref({
     name: props.product.name || '',
     description: props.product.description || '',
     category_id: props.product.category_id || '',
-    normal_price: props.product.normal_price || 0,
+    original_price: props.product.original_price || 0,
     price: props.product.price || 0,
     color: props.product.color || '',
     storage: props.product.storage || '',
@@ -335,7 +425,7 @@ const submitProduct = async () => {
         name: form.value.name,
         description: form.value.description || '',
         category_id: form.value.category_id,
-        normal_price: form.value.normal_price || 0,
+        original_price: form.value.original_price,
         price: form.value.price,
         color: form.value.color || '',
         storage: form.value.storage || '',
@@ -413,9 +503,79 @@ const closeCategoryModal = () => {
     categoryForm.value = { name: '' };
 };
 
+// Color methods
+const fetchColors = async () => {
+    try {
+        const response = await axios.get('/colors');
+        colors.value = (response.data || []).map((c) => c.name);
+    } catch (error) {
+        console.error('Error fetching colors:', error);
+    }
+};
+
+const submitColor = async () => {
+    const name = (colorForm.value.name || '').trim();
+    if (!name) return;
+    try {
+        const response = await axios.post('/colors', { name });
+        if (response.data && response.data.success && response.data.color) {
+            const newName = response.data.color.name;
+            if (!colors.value.includes(newName)) {
+                colors.value.push(newName);
+            }
+            form.value.color = newName;
+            closeColorModal();
+        }
+    } catch (error) {
+        console.error('Error creating color:', error);
+        alert('Error creating color. Please try again.');
+    }
+};
+
+const closeColorModal = () => {
+    showColorModal.value = false;
+    colorForm.value = { name: '' };
+};
+
+// Storage methods
+const fetchStorages = async () => {
+    try {
+        const response = await axios.get('/storages');
+        storages.value = (response.data || []).map((s) => s.name);
+    } catch (error) {
+        console.error('Error fetching storages:', error);
+    }
+};
+
+const submitStorage = async () => {
+    const name = (storageForm.value.name || '').trim();
+    if (!name) return;
+    try {
+        const response = await axios.post('/storages', { name });
+        if (response.data && response.data.success && response.data.storage) {
+            const newName = response.data.storage.name;
+            if (!storages.value.includes(newName)) {
+                storages.value.push(newName);
+            }
+            form.value.storage = newName;
+            closeStorageModal();
+        }
+    } catch (error) {
+        console.error('Error creating storage:', error);
+        alert('Error creating storage. Please try again.');
+    }
+};
+
+const closeStorageModal = () => {
+    showStorageModal.value = false;
+    storageForm.value = { name: '' };
+};
+
 // Lifecycle
 onMounted(() => {
     fetchCategories();
+    fetchColors();
+    fetchStorages();
     nextTick(() => {
         initializeDropzone();
     });

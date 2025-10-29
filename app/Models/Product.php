@@ -21,7 +21,6 @@ class Product extends Model
         'description',
         'category_id',
         'price',
-        'normal_price',
         'original_price',
         'image',
         'rating',
@@ -47,7 +46,6 @@ class Product extends Model
         'specifications' => 'array',
         'is_active' => 'boolean',
         'price' => 'decimal:2',
-        'normal_price' => 'decimal:2',
         'original_price' => 'decimal:2',
         'rating' => 'decimal:2',
     ];

@@ -9,6 +9,8 @@ use App\Http\Controllers\EcommerceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ColorController;
+use App\Http\Controllers\StorageController;
 use App\Http\Controllers\WebhookController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -84,6 +86,14 @@ Route::middleware('auth')->group(function () {
     // Category Management Routes
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+
+    // Color Management Routes
+    Route::get('/colors', [ColorController::class, 'index'])->name('colors.index');
+    Route::post('/colors', [ColorController::class, 'store'])->name('colors.store');
+
+    // Storage Management Routes
+    Route::get('/storages', [StorageController::class, 'index'])->name('storages.index');
+    Route::post('/storages', [StorageController::class, 'store'])->name('storages.store');
 
     // Order Management Routes (Admin)
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
