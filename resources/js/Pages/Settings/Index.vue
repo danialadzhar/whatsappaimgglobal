@@ -1,11 +1,18 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
+import axios from 'axios';
 
 const props = defineProps({
     settings: Object,
+    chatbotActive: Boolean,
 });
+
+// AI Activation state
+const chatbotActive = ref(props.chatbotActive || false);
+const isLoading = ref(false);
+const lastUpdated = ref(null);
 
 // Countdown settings state
 const countdownEnabled = ref(true);
@@ -17,6 +24,55 @@ const backgroundColor = ref('#1f2937');
 
 // Preview state
 const showPreview = ref(false);
+
+// Computed properties untuk text yang panjang
+const chatbotStatusText = computed(() => {
+    return chatbotActive.value
+        ? 'The AI Chatbot is active and can respond to customer messages'
+        : 'The AI Chatbot is not active - customers will not receive automatic replies';
+});
+
+const chatbotInfoText = computed(() => {
+    return chatbotActive.value
+        ? 'Customers will automatically receive replies from the AI chatbot via WhatsApp.'
+        : 'Customers will not receive automatic replies. Activate the chatbot for 24/7 service.';
+});
+
+// Toggle chatbot status
+const toggleChatbot = async () => {
+    isLoading.value = true;
+    try {
+        const response = await axios.post('/api/settings/chatbot-toggle', {
+            active: !chatbotActive.value
+        });
+
+        if (response.data.success) {
+            chatbotActive.value = response.data.chatbot_active;
+            lastUpdated.value = response.data.last_updated;
+
+            // Show success message
+            alert(response.data.message);
+        }
+    } catch (error) {
+        console.error('Error toggling chatbot:', error);
+        alert('Failed to update chatbot status');
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+// Get current chatbot status
+const getChatbotStatus = async () => {
+    try {
+        const response = await axios.get('/api/settings/chatbot-status');
+        if (response.data.success) {
+            chatbotActive.value = response.data.chatbot_active;
+            lastUpdated.value = response.data.last_updated;
+        }
+    } catch (error) {
+        console.error('Error getting chatbot status:', error);
+    }
+};
 
 const saveSettings = () => {
     // Logic akan ditambah kemudian
@@ -31,33 +87,103 @@ const resetToDefault = () => {
     urgencyText.value = '🔥 TAWARAN TERHAD! Promosi Ansuran Berakhir Dalam:';
     backgroundColor.value = '#1f2937';
 };
+
+// Load chatbot status on mount
+onMounted(() => {
+    getChatbotStatus();
+});
 </script>
 
 <template>
     <div>
 
-        <Head title="E-Commerce Settings" />
+        <Head title="Settings" />
 
         <AuthenticatedLayout>
             <div class="py-6">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <!-- Header -->
                     <div class="mb-8">
-                        <h1 class="text-3xl font-bold text-gray-900">E-Commerce Settings</h1>
-                        <p class="mt-2 text-sm text-gray-600">Manage your e-commerce store settings and countdown timer
-                            configuration</p>
+                        <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
+                        <p class="mt-2 text-sm text-gray-600">Manage your WhatsApp AI chatbot and e-commerce settings
+                        </p>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Settings Form -->
                         <div class="lg:col-span-2 space-y-6">
-                            <!-- Countdown Timer Settings Card -->
+                            <!-- AI Chatbot Settings Card -->
                             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                                 <div class="px-6 py-4 border-b border-gray-200">
-                                    <h2 class="text-lg font-semibold text-gray-900">Countdown Timer</h2>
+                                    <h2 class="text-lg font-semibold text-gray-900">🤖 AI Chatbot Settings</h2>
+                                    <p class="text-sm text-gray-500 mt-1">Control your WhatsApp AI chatbot activation
+                                    </p>
+                                </div>
+
+                                <div class="p-6 space-y-6">
+                                    <!-- Chatbot Status Toggle -->
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <label class="text-sm font-medium text-gray-700">Chatbot Status</label>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                {{ chatbotStatusText }}
+                                            </p>
+                                            <p v-if="lastUpdated" class="text-xs text-gray-400 mt-1">
+                                                Last updated: {{ lastUpdated }}
+                                            </p>
+                                        </div>
+                                        <button @click="toggleChatbot" :disabled="isLoading" :class="[
+                                            chatbotActive ? 'bg-green-600' : 'bg-gray-200',
+                                            isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-opacity-80'
+                                        ]"
+                                            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                            <span :class="chatbotActive ? 'translate-x-6' : 'translate-x-1'"
+                                                class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" />
+                                        </button>
+                                    </div>
+
+                                    <!-- Status Indicator -->
+                                    <div class="flex items-center gap-2">
+                                        <div :class="[
+                                            chatbotActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                        ]" class="px-3 py-1 rounded-full text-xs font-medium">
+                                            {{ chatbotActive ? '🟢 Active' : '🔴 Inactive' }}
+                                        </div>
+                                        <span v-if="isLoading" class="text-xs text-gray-500">Sedang mengemas
+                                            kini...</span>
+                                    </div>
+
+                                    <div class="border-t border-gray-200"></div>
+
+                                    <!-- Info Box -->
+                                    <div :class="[
+                                        chatbotActive ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'
+                                    ]" class="border rounded-lg p-4">
+                                        <div class="flex items-start">
+                                            <div class="flex-shrink-0">
+                                                <span class="text-lg">{{ chatbotActive ? '✅' : '⚠️' }}</span>
+                                            </div>
+                                            <div class="ml-3">
+                                                <h3 class="text-sm font-medium"
+                                                    :class="chatbotActive ? 'text-green-800' : 'text-yellow-800'">
+                                                    {{ chatbotActive ? 'Chatbot AI Active' : 'Chatbot AI Inactive' }}
+                                                </h3>
+                                                <p class="text-xs mt-1"
+                                                    :class="chatbotActive ? 'text-green-700' : 'text-yellow-700'">
+                                                    {{ chatbotInfoText }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- E-Commerce Settings Card -->
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                                <div class="px-6 py-4 border-b border-gray-200">
+                                    <h2 class="text-lg font-semibold text-gray-900">🛒 E-Commerce Settings</h2>
                                     <p class="text-sm text-gray-500 mt-1">Configure the countdown timer displayed on
-                                        your
-                                        store</p>
+                                        your store</p>
                                 </div>
 
                                 <div class="p-6 space-y-6">

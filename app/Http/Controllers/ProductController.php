@@ -63,6 +63,32 @@ class ProductController extends Controller
     }
 
     /**
+     * Show the form for creating a new product
+     */
+    public function create()
+    {
+        $categories = Category::orderBy('name')->get();
+
+        return Inertia::render('Products/Create', [
+            'categories' => $categories,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified product
+     */
+    public function edit($id)
+    {
+        $product = Product::with('category')->findOrFail($id);
+        $categories = Category::orderBy('name')->get();
+
+        return Inertia::render('Products/Edit', [
+            'product' => $product,
+            'categories' => $categories,
+        ]);
+    }
+
+    /**
      * Store a new product
      */
     public function store(Request $request)
@@ -73,12 +99,15 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
+            'normal_price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'is_active' => 'boolean',
+            'is_active' => 'nullable|in:0,1,true,false',
             'brand' => 'nullable|string|max:255',
             'sku' => 'nullable|string|max:255|unique:products,sku',
             'original_price' => 'nullable|numeric|min:0',
+            'color' => 'nullable|string|max:255',
+            'storage' => 'nullable|string|max:255',
             'colors' => 'nullable|array',
             'specifications' => 'nullable|array',
             'tags' => 'nullable|string',
@@ -96,6 +125,11 @@ class ProductController extends Controller
             $imageName = \time() . '_' . $image->getClientOriginalName();
             $imagePath = $image->storeAs('product_images', $imageName, 'public');
             $validated['image'] = $imagePath;
+        }
+
+        // Convert is_active to boolean
+        if (isset($validated['is_active'])) {
+            $validated['is_active'] = filter_var($validated['is_active'], FILTER_VALIDATE_BOOLEAN);
         }
 
         // Generate SKU if not provided
@@ -121,12 +155,15 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
+            'normal_price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'is_active' => 'boolean',
+            'is_active' => 'nullable|in:0,1,true,false',
             'brand' => 'nullable|string|max:255',
             'sku' => 'nullable|string|max:255|unique:products,sku,' . $id,
             'original_price' => 'nullable|numeric|min:0',
+            'color' => 'nullable|string|max:255',
+            'storage' => 'nullable|string|max:255',
             'colors' => 'nullable|array',
             'specifications' => 'nullable|array',
             'tags' => 'nullable|string',
@@ -151,7 +188,16 @@ class ProductController extends Controller
             $validated['image'] = $imagePath;
         }
 
+        // Convert is_active to boolean
+        if (isset($validated['is_active'])) {
+            $validated['is_active'] = filter_var($validated['is_active'], FILTER_VALIDATE_BOOLEAN);
+        }
+
         $product->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->route('products.index')->with('success', 'Product updated successfully');
     }

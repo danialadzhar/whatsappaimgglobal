@@ -21,11 +21,14 @@ class Product extends Model
         'description',
         'category_id',
         'price',
+        'normal_price',
         'original_price',
         'image',
         'rating',
         'reviews',
         'colors',
+        'color',
+        'storage',
         'stock',
         'is_active',
         'sku',
@@ -44,9 +47,17 @@ class Product extends Model
         'specifications' => 'array',
         'is_active' => 'boolean',
         'price' => 'decimal:2',
+        'normal_price' => 'decimal:2',
         'original_price' => 'decimal:2',
         'rating' => 'decimal:2',
     ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['image_url'];
 
     /**
      * Scope a query to only include active products.

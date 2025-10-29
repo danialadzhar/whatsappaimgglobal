@@ -1,14 +1,21 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
+import axios from 'axios';
 
 const showingNavigationDropdown = ref(false);
 const expandedMenus = ref(['E-Commerce']); // Track expanded menu items
+
+// Chatbot status
+const chatbotStatus = ref({
+    active: false,
+    lastUpdated: null
+});
 
 // Toggle submenu
 const toggleSubmenu = (itemName) => {
@@ -23,6 +30,24 @@ const toggleSubmenu = (itemName) => {
 const isExpanded = (itemName) => {
     return expandedMenus.value.includes(itemName);
 };
+
+// Get chatbot status
+const getChatbotStatus = async () => {
+    try {
+        const response = await axios.get('/api/settings/chatbot-status');
+        if (response.data.success) {
+            chatbotStatus.value.active = response.data.chatbot_active;
+            chatbotStatus.value.lastUpdated = response.data.last_updated;
+        }
+    } catch (error) {
+        console.error('Error getting chatbot status:', error);
+    }
+};
+
+// Load chatbot status on mount
+onMounted(() => {
+    getChatbotStatus();
+});
 
 // Navigation items sesuai design WallPay
 const navigationItems = ref([
@@ -141,14 +166,31 @@ const supportItems = ref([
                     </div>
                 </div>
 
+                <!-- Chatbot Status Indicator -->
+                <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">🤖 Chatbot AI</span>
+                            <div :class="[
+                                chatbotStatus.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            ]" class="px-2 py-1 rounded-full text-xs font-medium">
+                                {{ chatbotStatus.active ? 'Active' : 'Inactive' }}
+                            </div>
+                        </div>
+                        <Link :href="route('settings')" class="text-xs text-blue-600 hover:text-blue-800">
+                        Settings
+                        </Link>
+                    </div>
+                </div>
+
                 <!-- Navigation -->
                 <div class="mt-8 flex-grow flex flex-col">
                     <div class="px-3">
                         <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">General</p>
                         <nav class="mt-2 space-y-1">
-                            <template v-for="item in navigationItems" :key="item.name">
+                            <template v-for="item in navigationItems">
                                 <!-- Parent Menu Item with Children -->
-                                <div v-if="item.children">
+                                <div v-if="item.children" :key="`parent-${item.name}`">
                                     <button @click="toggleSubmenu(item.name)" :class="[
                                         item.active
                                             ? 'bg-blue-50 border-r-2 border-blue-600 text-blue-700'
@@ -185,7 +227,7 @@ const supportItems = ref([
                                 </div>
 
                                 <!-- Regular Menu Item without Children -->
-                                <Link v-else
+                                <Link v-else :key="`regular-${item.name}`"
                                     :href="['dashboard', 'customers', 'faq', 'chat', 'settings', 'products.index', 'orders.index'].includes(item.href) ? route(item.href) : item.href"
                                     :class="[
                                         item.active
@@ -285,9 +327,9 @@ const supportItems = ref([
                         <span class="text-xl font-bold text-gray-900">WallPay</span>
                     </div>
                     <nav class="mt-5 px-2 space-y-1">
-                        <template v-for="item in navigationItems" :key="item.name">
+                        <template v-for="item in navigationItems">
                             <!-- Parent Menu Item with Children -->
-                            <div v-if="item.children">
+                            <div v-if="item.children" :key="`mobile-parent-${item.name}`">
                                 <button @click="toggleSubmenu(item.name)"
                                     class="w-full flex items-center justify-between px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
                                     <div class="flex items-center">
@@ -315,7 +357,7 @@ const supportItems = ref([
                             </div>
 
                             <!-- Regular Menu Item without Children -->
-                            <ResponsiveNavLink v-else
+                            <ResponsiveNavLink v-else :key="`mobile-regular-${item.name}`"
                                 :href="['dashboard', 'customers', 'faq', 'chat', 'settings', 'products.index', 'orders.index'].includes(item.href) ? route(item.href) : item.href"
                                 :active="item.active">
                                 <span class="text-lg mr-3">{{ item.icon }}</span>
