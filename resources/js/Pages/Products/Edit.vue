@@ -84,7 +84,7 @@
                                     <div class="flex gap-2">
                                         <select v-model="form.color"
                                             class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                            <option value="">Pilih Warna</option>
+                                            <option value="">Choose Color</option>
                                             <option v-for="c in colors" :key="c" :value="c">{{ c }}</option>
                                         </select>
                                         <button type="button" @click="showColorModal = true"
@@ -98,7 +98,7 @@
                                     <div class="flex gap-2">
                                         <select v-model="form.storage"
                                             class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                            <option value="">Pilih Storage</option>
+                                            <option value="">Choose Storage</option>
                                             <option v-for="s in storages" :key="s" :value="s">{{ s }}</option>
                                         </select>
                                         <button type="button" @click="showStorageModal = true"
@@ -257,7 +257,7 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Color
                                                 Name</label>
-                                            <input v-model="colorForm.name" placeholder="Contoh: Black" type="text"
+                                            <input v-model="colorForm.name" placeholder="Example: Black" type="text"
                                                 required
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                                         </div>
@@ -299,7 +299,7 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Storage
                                                 Size</label>
-                                            <input v-model="storageForm.name" placeholder="Contoh: 256GB" type="text"
+                                            <input v-model="storageForm.name" placeholder="Example: 256GB" type="text"
                                                 required
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                                         </div>
