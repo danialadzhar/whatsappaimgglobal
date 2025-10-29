@@ -62,11 +62,15 @@ class EcommerceController extends Controller
                 'reviews' => (int) $product->reviews,
                 'category' => $product->category,
                 'colors' => $product->colors ?? [],
+                'color' => $product->color,
+                'storage' => $product->storage,
                 'is_new' => $isNew,
                 'stock' => (int) $product->stock,
                 'brand' => $product->brand,
                 'sku' => $product->sku,
                 'is_active' => (bool) $product->is_active,
+                // optionally include specifications so FE can read Storage fallback
+                'specifications' => $product->specifications ?? [],
             ];
         })->values();
 
@@ -103,6 +107,8 @@ class EcommerceController extends Controller
             'reviews' => (int) $product->reviews,
             'category' => $product->category,
             'colors' => $product->colors ?? [],
+            'color' => $product->color,
+            'storage' => $product->storage,
             'stock' => (int) $product->stock,
             'brand' => $product->brand,
             'sku' => $product->sku,
@@ -205,11 +211,15 @@ class EcommerceController extends Controller
                 'reviews' => (int) $product->reviews,
                 'category' => $product->category,
                 'colors' => $product->colors ?? [],
+                'color' => $product->color,
+                'storage' => $product->storage,
                 'is_new' => $isNew,
                 'stock' => (int) $product->stock,
                 'brand' => $product->brand,
                 'sku' => $product->sku,
                 'is_active' => (bool) $product->is_active,
+                // optional to help FE derive storage from specs when needed
+                'specifications' => $product->specifications ?? [],
             ];
         })->values();
 
