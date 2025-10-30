@@ -36,6 +36,12 @@ class CheckoutController extends Controller
             'quantity' => 'required|integer|min:1',
             'color' => 'nullable|string|max:50',
             'bank_code' => 'nullable|string|max:50', // Bank code untuk direct payment
+            // Alamat diperlukan hanya jika delivery_method ialah postage
+            'address_line1' => 'nullable|required_if:delivery_method,postage|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'nullable|required_if:delivery_method,postage|string|max:100',
+            'state' => 'nullable|required_if:delivery_method,postage|string|max:100',
+            'postcode' => 'nullable|required_if:delivery_method,postage|string|max:12',
         ]);
 
         try {
@@ -73,6 +79,11 @@ class CheckoutController extends Controller
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'],
                 'customer_email' => $validated['customer_email'],
+                'address_line1' => $validated['address_line1'] ?? null,
+                'address_line2' => $validated['address_line2'] ?? null,
+                'city' => $validated['city'] ?? null,
+                'state' => $validated['state'] ?? null,
+                'postcode' => $validated['postcode'] ?? null,
                 'delivery_method' => $validated['delivery_method'],
                 'payment_method' => $validated['payment_method'],
                 'subtotal' => $subtotal,

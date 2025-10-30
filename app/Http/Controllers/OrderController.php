@@ -28,6 +28,11 @@ class OrderController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
             'color' => 'nullable|string|max:50',
+            'address_line1' => 'nullable|required_if:delivery_method,postage|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'nullable|required_if:delivery_method,postage|string|max:100',
+            'state' => 'nullable|required_if:delivery_method,postage|string|max:100',
+            'postcode' => 'nullable|required_if:delivery_method,postage|string|max:12',
         ]);
 
         try {
@@ -60,6 +65,11 @@ class OrderController extends Controller
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'],
                 'customer_email' => $validated['customer_email'],
+                'address_line1' => $validated['address_line1'] ?? null,
+                'address_line2' => $validated['address_line2'] ?? null,
+                'city' => $validated['city'] ?? null,
+                'state' => $validated['state'] ?? null,
+                'postcode' => $validated['postcode'] ?? null,
                 'delivery_method' => $validated['delivery_method'],
                 'payment_method' => $validated['payment_method'],
                 'subtotal' => $subtotal,
@@ -137,6 +147,11 @@ class OrderController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
             'color' => 'nullable|string|max:50',
+            'address_line1' => 'nullable|required_if:delivery_method,postage|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'nullable|required_if:delivery_method,postage|string|max:100',
+            'state' => 'nullable|required_if:delivery_method,postage|string|max:100',
+            'postcode' => 'nullable|required_if:delivery_method,postage|string|max:12',
         ]);
 
         try {
@@ -165,6 +180,11 @@ class OrderController extends Controller
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'],
                 'customer_email' => $validated['customer_email'],
+                'address_line1' => $validated['address_line1'] ?? null,
+                'address_line2' => $validated['address_line2'] ?? null,
+                'city' => $validated['city'] ?? null,
+                'state' => $validated['state'] ?? null,
+                'postcode' => $validated['postcode'] ?? null,
                 'delivery_method' => $validated['delivery_method'],
                 'payment_method' => $validated['payment_method'],
                 'subtotal' => $subtotal,
