@@ -181,9 +181,9 @@ const submitCheckout = async () => {
 
 <template>
 
-    <Head title="Checkout" />
-
     <EcommerceLayout>
+
+        <Head title="Checkout" />
         <div class="min-h-screen bg-gray-50 py-8">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
