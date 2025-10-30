@@ -43,7 +43,9 @@ class BillplzService
                 'mobile' => $this->formatMobileNumber($order->customer_phone),
                 'name' => $order->customer_name,
                 'amount' => $amountInSen,
-                'description' => "Order #{$order->order_number}",
+                'description' => $order->payment_method === 'booking'
+                    ? "Order #{$order->order_number} (Deposit 50%)"
+                    : "Order #{$order->order_number}",
                 'callback_url' => config('services.billplz.callback_url'),
                 'redirect_url' => config('services.billplz.redirect_url') . '?order_id=' . $order->id,
 

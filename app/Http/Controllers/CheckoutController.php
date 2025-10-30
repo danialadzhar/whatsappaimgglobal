@@ -62,6 +62,11 @@ class CheckoutController extends Controller
             $paymentDiscount = $this->calculatePaymentDiscount($validated['payment_method'], $subtotal);
             $totalAmount = $subtotal - $deliveryDiscount - $paymentDiscount;
 
+            // Jika Booking/Pre-Order, hanya caj deposit 50%
+            if ($validated['payment_method'] === 'booking') {
+                $totalAmount = round($totalAmount * 0.5, 2);
+            }
+
             // Create order with pending status
             $order = Order::create([
                 'order_number' => Order::generateOrderNumber(),
