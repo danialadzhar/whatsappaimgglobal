@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\MessageLog;
 use Illuminate\Http\Request;
-use Throwable;
 use Inertia\Inertia;
 
 class CustomerController extends Controller
@@ -33,12 +32,14 @@ class CustomerController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'phone_number' => 'required|string|max:20',
+            'birthday' => 'nullable|date',
         ]);
 
         // Create new customer
         $customer = Customer::create([
             'name' => $request->name,
             'phone_number' => $request->phone_number,
+            'birthday' => $request->birthday,
         ]);
 
         // Return success response
@@ -81,7 +82,7 @@ class CustomerController extends Controller
                     ]
                 ], 200);
             }
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             // Return error response
             return response()->json([
                 'success' => false,
@@ -138,7 +139,7 @@ class CustomerController extends Controller
                 'errors' => $e->errors(),
                 'data' => null
             ], 422);
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             // Return error response
             return response()->json([
                 'success' => false,
@@ -189,7 +190,7 @@ class CustomerController extends Controller
                 'errors' => $e->errors(),
                 'data' => null
             ], 422);
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             // Return error response
             return response()->json([
                 'success' => false,
@@ -241,7 +242,7 @@ class CustomerController extends Controller
                 'message' => 'Message logs berjaya diambil',
                 'data' => $formattedData,
             ], 200);
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengambil message logs',
@@ -294,7 +295,7 @@ class CustomerController extends Controller
                 'errors' => $e->errors(),
                 'data' => null
             ], 422);
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengemas kini nama customer',
@@ -347,7 +348,7 @@ class CustomerController extends Controller
                 'errors' => $e->errors(),
                 'data' => null
             ], 422);
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengemas kini services mode customer',
@@ -401,7 +402,7 @@ class CustomerController extends Controller
                 'errors' => $e->errors(),
                 'data' => null
             ], 422);
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menyemak services mode customer',
