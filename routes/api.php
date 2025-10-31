@@ -8,6 +8,7 @@ use App\Http\Controllers\EcommerceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,9 @@ Route::get('/settings/ecommerce', [SettingsController::class, 'getEcommerceSetti
 // Ecommerce API Routes (without CSRF protection)
 Route::get('/ecommerce/products', [EcommerceController::class, 'apiIndex'])->name('api.ecommerce.products');
 Route::get('/ecommerce/products/{id}', [EcommerceController::class, 'apiShow'])->name('api.ecommerce.products.show');
+
+// Categories API Routes (public)
+Route::get('/categories', [CategoryController::class, 'index'])->name('api.categories.index');
 
 // Order API Routes (without CSRF protection)
 Route::post('/orders', [OrderController::class, 'apiStore'])->name('api.orders.store');

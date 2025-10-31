@@ -27,30 +27,10 @@ Route::get('/', function () {
 
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
-// Ecommerce Routes (Public - with rate limiting for security)
-Route::middleware('throttle:20,1')->group(function () {
-    Route::get('/ecommerce', [EcommerceController::class, 'index'])->name('ecommerce.index');
-    Route::get('/ecommerce/{id}', [EcommerceController::class, 'show'])->name('ecommerce.show');
-    Route::get('/ecommerce/checkout/{id}', [EcommerceController::class, 'checkout'])->name('ecommerce.checkout');
-
-    // Order tracking form + submit
-    Route::get('/ecommerce/order/track', [OrderController::class, 'trackForm'])->name('ecommerce.order.track.form');
-    Route::post('/ecommerce/order/track', [OrderController::class, 'trackSubmit'])
-        ->middleware('throttle:5,1')
-        ->name('ecommerce.order.track.submit');
-
-    // Order detail via signed link only (protected from IDOR)
-    Route::get('/ecommerce/order/{orderNumber}', [OrderController::class, 'show'])
-        ->middleware('signed')
-        ->name('ecommerce.order.show');
-});
-
-// Order Routes (Public)
-Route::post('/ecommerce/order', [OrderController::class, 'store'])->name('ecommerce.order.store');
-Route::get('/ecommerce/order/success/{id}', [OrderController::class, 'success'])->name('ecommerce.order.success');
+// [Removed] Public Ecommerce and Order routes per request
 
 // Billplz Redirect Route (Public - customer redirect selepas payment)
-Route::get('/billplz/redirect', [WebhookController::class, 'handleBillplzRedirect'])->name('billplz.redirect');
+// Route::get('/billplz/redirect', [WebhookController::class, 'handleBillplzRedirect'])->name('billplz.redirect');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
