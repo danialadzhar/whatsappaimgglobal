@@ -52,6 +52,8 @@ Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('api.cha
 // Settings API Routes (without CSRF protection)
 Route::post('/settings/chatbot-toggle', [SettingsController::class, 'toggleChatbot'])->name('api.settings.chatbot-toggle')->withoutMiddleware(['web']);
 Route::get('/settings/chatbot-status', [SettingsController::class, 'getChatbotStatus'])->name('api.settings.chatbot-status');
+Route::post('/settings/ecommerce', [SettingsController::class, 'saveEcommerceSettings'])->name('api.settings.ecommerce.save')->withoutMiddleware(['web']);
+Route::get('/settings/ecommerce', [SettingsController::class, 'getEcommerceSettings'])->name('api.settings.ecommerce.get');
 
 // Ecommerce API Routes (without CSRF protection)
 Route::get('/ecommerce/products', [EcommerceController::class, 'apiIndex'])->name('api.ecommerce.products');

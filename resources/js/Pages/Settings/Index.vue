@@ -14,13 +14,13 @@ const chatbotActive = ref(props.chatbotActive || false);
 const isLoading = ref(false);
 const lastUpdated = ref(null);
 
-// Countdown settings state
-const countdownEnabled = ref(true);
-const countdownDays = ref(3);
-const countdownHours = ref(11);
-const countdownMinutes = ref(31);
-const urgencyText = ref('🔥 TAWARAN TERHAD! Promosi Ansuran Berakhir Dalam:');
-const backgroundColor = ref('#1f2937');
+// Countdown settings state (init dari props.settings jika ada)
+const countdownEnabled = ref(props.settings?.countdown_enabled ?? true);
+const countdownDays = ref(props.settings?.countdown_days ?? 3);
+const countdownHours = ref(props.settings?.countdown_hours ?? 11);
+const countdownMinutes = ref(props.settings?.countdown_minutes ?? 31);
+const urgencyText = ref(props.settings?.urgency_text ?? '🔥 TAWARAN TERHAD! Promosi Ansuran Berakhir Dalam:');
+const backgroundColor = ref(props.settings?.background_color ?? '#1f2937');
 
 // Preview state
 const showPreview = ref(false);
@@ -74,9 +74,28 @@ const getChatbotStatus = async () => {
     }
 };
 
-const saveSettings = () => {
-    // Logic akan ditambah kemudian
-    console.log('Saving settings...');
+const saveSettings = async () => {
+    try {
+        isLoading.value = true;
+        const response = await axios.post('/api/settings/ecommerce', {
+            countdown_enabled: countdownEnabled.value,
+            countdown_days: countdownDays.value,
+            countdown_hours: countdownHours.value,
+            countdown_minutes: countdownMinutes.value,
+            urgency_text: urgencyText.value,
+            background_color: backgroundColor.value,
+        });
+        if (response.data.success) {
+            alert(response.data.message);
+        } else {
+            alert('Gagal menyimpan settings');
+        }
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        alert('Gagal menyimpan settings');
+    } finally {
+        isLoading.value = false;
+    }
 };
 
 const resetToDefault = () => {
