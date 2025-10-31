@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->unsignedInteger('countdown_days')->default(3);
             $table->unsignedTinyInteger('countdown_hours')->default(11);
             $table->unsignedTinyInteger('countdown_minutes')->default(31);
-            $table->text('urgency_text')->default('🔥 TAWARAN TERHAD! Promosi Ansuran Berakhir Dalam:');
+            $table->text('urgency_text');
             $table->string('background_color', 20)->default('#1f2937');
             $table->timestamps();
         });
